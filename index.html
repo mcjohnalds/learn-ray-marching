@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Learn Ray Marching</title>
+        <link rel="stylesheet" href="style.css" type="text/css"</link>
+        <link rel="stylesheet" href="fonts/computer-modern/cmun-sans.css" type="text/css"</link>
+        <link rel="stylesheet" href="fonts/computer-modern/cmun-typewriter.css" type="text/css"</link> 
+        <script type="text/javascript" async
+            src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+        </script>
+        <script src="js/jquery-2.2.3.js"></script>
+        <script src="js/ace-builds/src/ace.js" type="text/javascript"
+            charset="utf-8">
+        </script>
+        <script src="js/ShaderDemo.js"></script>
+        <script src="js/main.js"></script>
+        <script src="shaders/vertex.glsl"></script>
+        <script src="shaders/simple.glsl"></script>
+        <script src="shaders/minimalSphere.glsl"></script>
+        <script src="shaders/shadedSphere.glsl"></script>
+        <script src="shaders/minimalSphere.glsl"></script>
+        <script src="shaders/trsCube.glsl"></script>
+    </head>
+    <body>
+        <h1>Learn Ray Marching</h1>
+
+        <h2>Introduction</h2>
+
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+        minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+        ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
+        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
+        sint occaecat cupidatat non proident, sunt in culpa qui officia
+        deserunt mollit anim id est laborum.</p>
+
+        <h2>Ray marching: Overview</h2>
+
+        <p>You will have seen rasterizers and ray tracers before, which usually
+        define the geometry of 3D shapes explicitly using large numbers of
+        triangles. However, ray marchers take a different approach, instead
+        defining shapes by using what's called a distance function. A distance
+        function for a shape is a math function that takes a point
+        $P$ and returns the distance of $P$ from the
+        boundary of the shape. We have in our scene:</p>
+
+        <ul>
+            <li>An arbitrary shaped described by a distance function $f$. It
+                could be something simple like a sphere, or something more
+                complicated like a fractal or building.</li>
+            <li>The computer screen, represented as a 2D rectangle, sitting in
+                3D space. We will call it the image plane and it has many
+                pixels we will need to color.</li>
+            <li>A camera is sitting at a position $\boldsymbol{r}_0$ facing the
+                image plane.</li>
+            <li>A maximum draw distance, anything beyond this will not be
+                drawn.</li>
+        </ul>
+
+        <p>There are many ways to make a ray marcher, but the way we will focus
+        on here is the sphere tracing algorithm. The sphere tracing algorithm
+        works separately on each pixel as follows:</p>
+
+        <ol>
+            <li>Construct a ray
+                $\boldsymbol{r}(t)=\boldsymbol{r}_0+t\boldsymbol{r}_d$ (the
+                camera ray) that starts from the camera's position and is
+                directed towards the pixel. We want to move along the ray until
+                we touch the boundary of the shape, but we don't want to
+                overshoot and pierce through the shape.</li>
+            <li>Let $t$ be how far we have moved along the ray (so that
+                $\boldsymbol{r}(t)$ is our current position on the ray) and set
+                $t\leftarrow0$.</li>
+            <li>Now, we could get closer to the shape without going through it
+                by moving along the ray a distance of $f(\boldsymbol{r}(t))$,
+                So we set $t\leftarrow t+f(\boldsymbol{r}(t))$.</li>
+            <li>If the ray was indeed heading towards the shape and the shape
+                was a sphere, we would now be at its boundary, but something
+                more complicated like a torus (donut) might take multiple
+                steps. Or, our ray might not hit the shape anywhere and
+                continue on forever. So, we repeat step 3 until either we are
+            at the boundary of the shape (i.e, $f(\boldsymbol{r}(t))=0$), or,
+            we have passed beyond some maximum draw distance.</li>
+        </ol>
+
+        <p>The algorithm has given us the output:</p>
+
+        <ul>
+            <li>Whether our ray has hit the shape at all, or continued on
+                forever,</li>
+            <li>How far away the sphere is, $t$,</li>
+            <li>The point at which our ray hit the sphere,
+                $\boldsymbol{r}(t)$.</li>
+        </ul>
+
+        <p>Additionally, by sampling several nearby points, we can approximate
+        the normal to the surface with a central differences approximation.
+        With this information, we can shade the pixel and our algorithm has
+        done its job. We will write this algorithm inside what's called a
+        fragment shader.</p>
+
+        <h2>Fragment shaders</h2>
+
+        <p>A fragment shader is a small program that is executed on every pixel
+        of the window*. It takes in some arbitrary input and then outputs the
+        pixel color. WebGL (or OpenGL, or DirectX, etc) allows us to harness
+        the power of the GPU to run these fragment shaders in parallel at
+        blazing speeds. Ray marching can be done exclusively in a fragment
+        shader.</p>
+
+        <figure class="shader-demo">
+            <canvas data-shader="simple"></canvas>
+            <figcaption>Example of shader.</figcaption>
+        </figure>
+
+        <p class="note">* Multiple fragments may actually correspond to a
+        single pixel, but we won't be seeing any examples of that.</p>
+
+        <h2>Distance functions</h2>
+
+        <p>A distance function of a shape simply takes a point $P$
+        and tells you how far away $P$ is from the boundary of
+        that shape.  For example the distance function of a circle with radius
+        $r$, centered at $(0,0,0)$ is simply</p>
+
+        <code class="read-only"><script type="glsl">
+float sphereDF(vec3 p, float r) {
+    return length(p) - r;
+}
+        </script></code>
+
+        <p>To visualize this, imagine standing at a point $P$ looking at a circle
+        at $(0,0,0)$ which has radius $r$.</p>
+
+        <figure class="image">
+            <object data="img/looking-outside-circle.svg" type="image/svg+xml"></object>
+            <figcaption>Viewpoint at $P$ with a circle of radius
+            $r$.</figcaption>
+        </figure>
+
+        <p>Since it's possible to be either inside or outside of the shape, a
+        particular distance function might be a signed distance function, which
+        is a distance function whose sign tells you whether $P$ is
+        outside of the shape ($f(P)$ is positive) or inside
+        ($f(P)$ is negative). The sphere distance function an
+        example of a signed distance function.</p>
+
+        <h2>Camera rays</h2>
+
+        <figure class="shader-demo">
+            <canvas data-shader="minimalSphere"></canvas>
+            <figcaption>Raymarched sphere.</figcaption>
+        </figure>
+
+        <h2>Lighting</h2>
+
+        <p>Now we can add Phong lighting. Lorem ipsum dolor sit amet,
+        consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+        et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+        dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+        proident, sunt in culpa qui officia deserunt mollit anim id est
+        laborum.</p>
+
+        <figure class="shader-demo">
+            <canvas data-shader="shadedSphere"></canvas>
+            <figcaption>Shaded sphere.</figcaption>
+        </figure>
+
+        <h2>Movement, cubes</h2>
+
+        <p>We can do a lot more than just spheres. Lorem ipsum dolor sit amet,
+        consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+        et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+        dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+        proident, sunt in culpa qui officia deserunt mollit anim id est
+        laborum.</p>
+
+        <figure class="shader-demo">
+            <canvas data-shader="trsCube"></canvas>
+            <figcaption>Cube that has been translated, rotated, then
+            scaled.</figcaption>
+        </figure>
+    </body>
+</html>

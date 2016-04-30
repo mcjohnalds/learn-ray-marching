@@ -1,0 +1,66 @@
+body {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+    counter-reset: figures;
+    counter-reset: headings;
+    font-family: 'Computer Modern Sans';
+    font-style: bold;
+}
+
+h1 {
+    text-align: center;
+    padding-bottom: 16px;
+    border-bottom: 2px solid black;
+}
+
+h2 {
+    counter-increment: headings;
+}
+
+figure.shader-demo > canvas {
+    display: block;
+}
+
+figure {
+    width: 400px;
+    counter-increment: figures;
+    display: block;
+    margin: 16px auto;
+}
+
+figure > * {
+    display: block;
+    background-color: #EEE;
+    padding: 10px 10px;
+    margin: 0px auto;
+}
+
+figcaption {
+    text-align: center;
+    width: 100%;
+    display: block;
+    padding: 0px 10px 10px 10px;
+}
+
+figure > figcaption:before {
+    content: "Figure " counter(figures) ". ";
+}
+
+figure.image > object {
+    width: 100%;
+}
+
+h2:before {
+    content: counter(headings) '. ';
+}
+
+.note {
+    font-style: italic;
+}
+
+code {
+    display: block;
+    margin: 16px 0;
+    border: 1px solid #EEE;
+}
