@@ -88,7 +88,6 @@ void main(void) {
     vec2 ndc = (2.0 * gl_FragCoord.xy - resolution.xy) / resolution.y;
     vec3 ro = vec3(0.0, 0.0, 1.0);
     vec3 rd = normalize(vec3(ndc, -1.0));
-    vec3 color = vec3(0.8, 0.85, 0.95);
 
     float tmax = 125.0;
     float t = 0.0;
@@ -104,9 +103,9 @@ void main(void) {
     if (t < tmax) {
         vec3 pos = ro + rd * t;
         vec3 normal = normal(pos);
-        color = shade(normal, normalize(lightPos), ro);
+        gl_FragColor = vec4(shade(normal, normalize(lightPos), ro), 1.0);
+    } else {
+        gl_FragColor = vec4(0.0);
     }
-
-    gl_FragColor = vec4(color, 1.0);
 }
 `;

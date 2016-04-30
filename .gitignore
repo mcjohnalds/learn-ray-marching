@@ -1,2 +1,5 @@
 Gemfile.lock
-.bundle/
+.bundle
+_site
+.sass-cache
+.jekyll-metadata

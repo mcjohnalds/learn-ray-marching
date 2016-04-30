@@ -1,0 +1,27 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
+    <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
+    <!-- <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}"> -->
+    <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
+    <link rel="stylesheet" href="/fonts/computer-modern/cmun-sans.css" type="text/css"</link>
+    <link rel="stylesheet" href="/fonts/computer-modern/cmun-typewriter.css" type="text/css"</link> 
+    <script type="text/javascript" async
+        src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <script src="/js/jquery-2.2.3.js"></script>
+    <script src="/js/ace-builds/src/ace.js" type="text/javascript"
+        charset="utf-8">
+    </script>
+    <script src="/js/ShaderDemo.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/shaders/vertex.glsl"></script>
+    <script src="/shaders/simple.glsl"></script>
+    <script src="/shaders/minimalSphere.glsl"></script>
+    <script src="/shaders/shadedSphere.glsl"></script>
+    <script src="/shaders/minimalSphere.glsl"></script>
+    <script src="/shaders/trsCube.glsl"></script>
+    <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}" type="text/css"></link>
+</head>

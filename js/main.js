@@ -11,7 +11,7 @@ $(window).load(function() {
         var canvas = $(this)[0];
         new ShaderDemo(canvas);
     });
-    
+
     var editors = $(".read-only").each(function() {
         var el = $(this)
 

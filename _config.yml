@@ -1,0 +1,11 @@
+# Site settings
+title: Learn Ray Marching
+email: johnowen357@gmail.com
+description: > # this means to ignore newlines until "baseurl:"
+    Learn the theory and implementation of how ray marching algorithms work.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "http://mcjohnalds.github.io/learn-ray-marching"
+github_username: mcjohnalds
+
+# Build settings
+markdown: kramdown

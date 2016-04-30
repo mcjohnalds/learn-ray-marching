@@ -7,7 +7,6 @@ const float drawDistance = 125.0; // Maximum distance to march per ray
 const int maxMarches = 200; // Maximum marches to make per ray
 const float marchEpsilon = 0.001; // Stop marching when we're this close
 const vec3 camPos = vec3(0.0, 0.0, 1.0); // Camera position
-const vec3 skyColor = vec3(0.8, 0.85, 0.95);
 const vec3 sphereColor = vec3(0.95, 0.2, 0.2);
 
 // Sphere signed distance function.
@@ -31,21 +30,21 @@ void main(void) {
     vec3 ro = camPos; // Ray origin
     vec3 rd = rayDirection(); // Ray direction
 
-    // Final fragment color
-    vec3 color = skyColor;
-
     float t = 0.0;
     for (int i = 0; i < maxMarches; i++) {
-        vec3 p = ro + rd * t;
+        vec3 p = ro + rd * t; // Our current position along the ray
         float d = sphereSDF(p, 0.5);
-        if (d < marchEpsilon || t > drawDistance)
-            break;
         t += d;
+
+        if (d < marchEpsilon) {
+            gl_FragColor = vec4(sphereColor, 1.0);
+            break;
+        }
+        
+        if (t > drawDistance) {
+            gl_FragColor = vec4(0.0);
+            break;
+        }
     }
-
-    if (t < drawDistance)
-        color = sphereColor;
-
-    gl_FragColor = vec4(color, 1.0);
 }
 `;

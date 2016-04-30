@@ -110,7 +110,7 @@ ShaderDemo.prototype._updateUniforms = function() {
 
 ShaderDemo.prototype._drawScene = function(shaderProgram, positionBuffer) {
     var gl = this._gl;
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(0, 0, 0, 0);
     var width = this._canvas.width;
     var height = this._canvas.height;
     gl.viewport(0, 0, width, height);
