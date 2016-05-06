@@ -1,0 +1,46 @@
+---
+---
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GLSL Editor</title>
+        <script src="/js/jquery-2.2.3.js"></script>
+        <script src="/js/ace-builds/src/ace.js" type="text/javascript"
+            charset="utf-8">
+        </script>
+        <script src="/js/ShaderToy.js"></script>
+        <script src="/js/editor.js"></script>
+        <link rel="stylesheet" href="/fonts/computer-modern/cmun-sans.css" type="text/css"</link>
+        <link rel="stylesheet" href="/fonts/computer-modern/cmun-typewriter.css" type="text/css"</link> 
+        <link rel="stylesheet" href="/css/editor.css" type="text/css"></link>
+    </head>
+    <body>
+        <div class="editor-container">
+            <header>
+                <select class="file-selector">
+                    {% assign files = "camera-rotation diffuse-sphere minimal-sphere rotate-xyz simple.glsl sphere-specular trs-cube union-intersect-subtract" | split: " " %}
+                    {% for file in files %}
+                        <option value="{{ file }}">{{ file }}</option>
+                    {% endfor %}
+                </select>
+            </header>
+
+            <div class="editor-columns">
+                <div class="editor-left-column">
+                    <pre class="editor">================================================================================</pre>
+                </div>
+                <div class="editor-right-column">
+                    <div class="editor-wrapper">
+                        <canvas class="editor-demo"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-output">
+                <div class="output"></div>
+                <h1>GLSL Fragment Shader Editor</h1>
+            </div>
+        </div>
+    </body>
+</html>
