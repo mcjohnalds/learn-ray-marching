@@ -48,6 +48,16 @@ void main(void) {
                       gl_Position = vec4(pos, 0.0, 1.0);
                   }`;
 
-    var toy = new ShaderToy($(".editor-demo")[0]);
+    var canvas = $(".editor-demo");
+    canvas[0].width = canvas.width();
+    canvas[0].height = canvas.height();
+    var toy = new ShaderToy(canvas[0]);
     compileShader();
+
+    $(".play-pause").change(function() {
+        if (this.checked)
+            toy.play();
+        else
+            toy.pause();
+    });
 });

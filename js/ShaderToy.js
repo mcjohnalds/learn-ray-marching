@@ -29,6 +29,7 @@ var ShaderToy = (function() {
     var positionBuffer;
     var uniforms;
     var program;
+    var playing = true;
 
     function getWebGLContext(canvas) {
         try {
@@ -102,7 +103,19 @@ var ShaderToy = (function() {
         gl.clear(gl.COLOR_BUFFER_BIT);
         updateUniforms();
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        window.requestAnimationFrame(drawLoop.bind(this));
+        if (playing)
+            window.requestAnimationFrame(drawLoop.bind(this));
+    }
+
+    O.prototype.pause = function() {
+        playing = false;
+    }
+
+    O.prototype.play = function() {
+        if (!playing) {
+            playing = true;
+            drawLoop();
+        }
     }
 
     O.prototype.load = function(vertexShaderSource, fragmentShaderSource) {
