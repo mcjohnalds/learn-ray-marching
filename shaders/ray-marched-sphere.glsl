@@ -1,4 +1,3 @@
-shaders.minimalSphere = `
 precision mediump float;
 uniform vec2 resolution;
 const float pi = 3.1415926535897932384626433832795;
@@ -7,14 +6,13 @@ const float drawDistance = 125.0; // Maximum distance to march per ray
 const int maxMarches = 200; // Maximum marches to make per ray
 const float marchEpsilon = 0.001; // Stop marching when we're this close
 const vec3 camPos = vec3(0.0, 0.0, 1.0); // Camera position
-const vec3 sphereColor = vec3(0.95, 0.2, 0.2);
 
 // Sphere signed distance function.
 float sphereSDF(vec3 p, float radius) {
     return length(p) - radius;
 }
 
-// Compute world coordinates of the fragment on the image plane.
+// Compute direction of our ray.
 vec3 rayDirection() {
     // For simplicity, we won't bother transforming the camera direction, so
     // camera space is the same as world space
@@ -30,6 +28,7 @@ void main(void) {
     vec3 ro = camPos; // Ray origin
     vec3 rd = rayDirection(); // Ray direction
 
+    // March along the ray
     float t = 0.0;
     for (int i = 0; i < maxMarches; i++) {
         vec3 p = ro + rd * t; // Our current position along the ray
@@ -37,14 +36,15 @@ void main(void) {
         t += d;
 
         if (d < marchEpsilon) {
-            gl_FragColor = vec4(sphereColor, 1.0);
+            // The ray hit the sphere
+            gl_FragColor = vec4(0.95, 0.2, 0.2, 1.0);
             break;
         }
         
         if (t > drawDistance) {
+            // The ray didn't hit the sphere
             gl_FragColor = vec4(0.0);
             break;
         }
     }
 }
-`;
