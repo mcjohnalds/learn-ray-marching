@@ -2,14 +2,13 @@ precision mediump float;
 uniform vec2 resolution;
 uniform float time;
 const float pi = 3.1415926535897932384626433832795;
-const float fov = 90.0;
+const float fov = 80.0;
 const float drawDistance = 125.0;
 const int maxMarches = 200;
 const float marchEpsilon = 0.001;
 const vec3 camPos = vec3(0.0, 0.0, 1.5);
 const vec3 lightPos = vec3(1.0, 1.0, 1.0);
-const vec3 lightDiffuse = vec3(1.4);
-const vec3 lightSpecular = vec3(0.9);
+const vec3 lightColor = vec3(1.4);
 const vec3 ambientLight = vec3(0.05);
 const vec3 shapeDiffuse = vec3(0.95, 0.2, 0.2);
 const vec3 shapeSpecular = vec3(0.7);
@@ -64,8 +63,7 @@ vec3 getNormal(vec3 p) {
     return normalize(n);
 }
 
-vec3 getShading(vec3 p) {
-    vec3 n = getNormal(p);
+vec3 getShading(vec3 p, vec3 n) {
     vec3 l = normalize(lightPos - p);
     float iDiff = max(dot(n, l), 0.0);
     iDiff = clamp(iDiff, 0.0, 1.0);
@@ -75,9 +73,8 @@ vec3 getShading(vec3 p) {
     float iSpec = pow(max(dot(r, c), 0.0), shapeShininess);
     iSpec = clamp(iSpec, 0.0, 1.0);
 
-    return shapeDiffuse * lightDiffuse * iDiff
-        + shapeSpecular * lightSpecular * iSpec
-        + ambientLight;
+    return lightColor * (shapeDiffuse * iDiff + shapeSpecular * iSpec) +
+        ambientLight;
 }
 
 void main(void) {
@@ -91,7 +88,8 @@ void main(void) {
         t += d;
 
         if (d < marchEpsilon) {
-            vec3 s = getShading(p);
+            vec3 n = getNormal(p);
+            vec3 s = getShading(p, n);
             gl_FragColor = vec4(s, 1.0);
             break;
         }

@@ -20,6 +20,7 @@ var ShaderToy = (function() {
         height = canvas.height;
         startTime = Date.now() / 1000;
         positionBuffer = createPositionBuffer();
+        drawLoop();
     }
 
     var gl;
@@ -29,7 +30,8 @@ var ShaderToy = (function() {
     var positionBuffer;
     var uniforms;
     var program;
-    var playing = true;
+    var playing = false;
+    var ready = false;
 
     function getWebGLContext(canvas) {
         try {
@@ -53,8 +55,8 @@ var ShaderToy = (function() {
     }
 
     function createShader(type, source) {
-        console.assert(type == gl.VERTEX_SHADER || type == gl.FRAGMENT_SHADER);
-        console.assert(typeof source == "string");
+        console.assert(type === gl.VERTEX_SHADER || type === gl.FRAGMENT_SHADER);
+        console.assert(typeof source === "string");
         var shader = gl.createShader(type);
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
@@ -98,25 +100,27 @@ var ShaderToy = (function() {
     }
 
     function drawLoop() {
-        gl.clearColor(0, 0, 0, 0);
-        gl.viewport(0, 0, width, height);
+        window.requestAnimationFrame(drawLoop.bind(this));
+        if (!ready || !playing)
+            return
         gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.viewport(0, 0, width, height);
         updateUniforms();
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        if (playing)
-            window.requestAnimationFrame(drawLoop.bind(this));
     }
 
     O.prototype.pause = function() {
         playing = false;
-    }
+    };
 
     O.prototype.play = function() {
-        if (!playing) {
-            playing = true;
-            drawLoop();
-        }
-    }
+        playing = true;
+    };
+
+    O.prototype.setResolution = function(w, h) {
+        width = w;
+        height = h;
+    };
 
     O.prototype.load = function(vertexShaderSource, fragmentShaderSource) {
         if (program) gl.deleteProgram(program);
@@ -127,7 +131,7 @@ var ShaderToy = (function() {
         gl.detachShader(program, fShader);
         updatePosAttribute();
         uniforms = getUniforms();
-        drawLoop();
+        ready = true;
     }
 
     return O;

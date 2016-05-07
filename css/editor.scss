@@ -19,17 +19,17 @@ body {
     height: 100%;
 }
 
-.editor-container {
+.ide {
     height: 100%;
 
     header {
         height: $editor-header-height;
     }
 
-    .editor-columns {
+    main {
         height: calc(100% - #{$editor-output-height} - #{$editor-header-height});
 
-        .editor-left-column {
+        .left-column {
             float: left;
             width: 50%;
             height: 100%;
@@ -41,12 +41,12 @@ body {
             }
         }
 
-        .editor-right-column {
+        .right-column {
             float: right;
             width: 50%;
             height: 100%;
 
-            .editor-wrapper {
+            .demo-wrapper {
                 width: 100%;
                 height: 100%;
 
@@ -56,7 +56,7 @@ body {
                 -moz-transform-style: preserve-3d;
                 transform-style: preserve-3d;
 
-                .editor-demo {
+                .demo {
                     position: relative;
                     top: 50%;
                     transform: translateY(-50%);
@@ -68,7 +68,7 @@ body {
         }
     }
 
-    .editor-output {
+    footer {
         width: 100%;
         height: $editor-output-height;
         padding: 0.3rem;
@@ -76,6 +76,14 @@ body {
         // Align children vertically
         display: flex;
         align-items: center;
+
+        &.success {
+            background-color: #A1D490;
+        }
+
+        &.fail {
+            background-color: #D4A190;
+        }
 
         .output {
             margin-right: auto;
@@ -86,13 +94,5 @@ body {
             margin-left: auto;
             padding-right: 1rem;
         }
-    }
-
-    .output-success {
-        background-color: #A1D490;
-    }
-
-    .output-fail {
-        background-color: #D4A190;
     }
 }

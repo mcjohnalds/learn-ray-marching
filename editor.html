@@ -10,13 +10,14 @@
             charset="utf-8">
         </script>
         <script src="/js/ShaderToy.js"></script>
+        <script src="/js/IDE.js"></script>
         <script src="/js/editor.js"></script>
         <link rel="stylesheet" href="/fonts/computer-modern/cmun-sans.css" type="text/css"</link>
         <link rel="stylesheet" href="/fonts/computer-modern/cmun-typewriter.css" type="text/css"</link> 
         <link rel="stylesheet" href="/css/editor.css" type="text/css"></link>
     </head>
     <body>
-        <div class="editor-container">
+        <div class="ide">
             <header>
                 <select class="file-selector">
                     {% assign files = "camera-rotation diffuse-sphere minimal-sphere rotate-xyz simple.glsl sphere-specular trs-cube union-intersect-subtract" | split: " " %}
@@ -24,24 +25,38 @@
                         <option value="{{ file }}">{{ file }}</option>
                     {% endfor %}
                 </select>
-                <input class="play-pause" type="checkbox">
+
+                <select class="resolution-selector">
+                    <option value="100"></option>
+                    <option value="90"></option>
+                    <option value="80"></option>
+                    <option value="70" selected></option>
+                    <option value="60"></option>
+                    <option value="50"></option>
+                    <option value="40"></option>
+                    <option value="30"></option>
+                    <option value="20"></option>
+                    <option value="10"></option>
+                </select>
+
+                <input class="play-pause-button" type="checkbox" checked>
             </header>
 
-            <div class="editor-columns">
-                <div class="editor-left-column">
+            <main>
+                <div class="left-column">
                     <pre class="editor"></pre>
                 </div>
-                <div class="editor-right-column">
-                    <div class="editor-wrapper">
-                        <canvas class="editor-demo"></canvas>
+                <div class="right-column">
+                    <div class="demo-wrapper">
+                        <canvas class="demo"></canvas>
                     </div>
                 </div>
-            </div>
+            </main>
 
-            <div class="editor-output">
+            <footer>
                 <div class="output"></div>
                 <h1>GLSL Fragment Shader Editor</h1>
-            </div>
+            </footer>
         </div>
     </body>
 </html>
