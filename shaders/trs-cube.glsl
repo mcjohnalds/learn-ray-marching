@@ -14,6 +14,7 @@ const vec3 shapeDiffuse = vec3(0.95, 0.2, 0.2);
 const vec3 shapeSpecular = vec3(0.7);
 const float shapeShininess = 16.0;
 
+// Create a rotation matrix given a pitch, yaw, and roll.
 mat3 rotateXYZ(float x, float y, float z) {
     float sx = sin(x), cx = cos(x);
     float sy = sin(y), cy = cos(y);
