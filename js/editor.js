@@ -5,7 +5,8 @@ $(window).load(function() {
         demo: $(".ide .demo"),
         footer: $(".ide footer"),
         output: $(".ide .output"),
-        playPause: $(".ide .play-pause-button"),
         resolution: $(".ide .resolution-selector"),
+        theme: $(".ide .theme-selector"),
+        playPause: $(".ide .play-pause-button"),
     });
 });

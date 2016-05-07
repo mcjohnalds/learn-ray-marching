@@ -1,6 +1,6 @@
 var IDE = (function() {
-    var defaultVSource = `attribute vec2 pos;\n\nvoid main(void) {\n    gl_Position = vec4(pos, 0.0, 1.0);\n}`;
-    var defaultFSource = `precision mediump float;\nuniform vec2 resolution;\n\nvoid main(void) {\n    vec2 uv = gl_FragCoord.xy / resolution.xy;\n    gl_FragColor = vec4(uv, 0.0, 1.0);\n}`;
+    var defaultVSource = "attribute vec2 pos;\n\nvoid main(void) {\n    gl_Position = vec4(pos, 0.0, 1.0);\n}";
+    var defaultFSource = "precision mediump float;\nuniform vec2 resolution;\n\nvoid main(void) {\n    vec2 uv = gl_FragCoord.xy / resolution.xy;\n    gl_FragColor = vec4(uv, 0.0, 1.0);\n}";
 
     function init(elems) {
         var editor = createEditor(elems.editor[0]);
@@ -15,13 +15,14 @@ var IDE = (function() {
                                       editor.getValue())
         });
         compileShader(elems, demo, defaultVSource, defaultFSource);
+        elems.resolution.change(() => setResolution(elems, demo))
+        elems.theme.change(() => setTheme(elems, editor));
         elems.playPause.change(function() {
             if (this.checked)
                 demo.play();
             else
                 demo.pause();
         });
-        elems.resolution.change(() => setResolution(elems, demo))
     }
 
     function setResolution(elems, demo) {
@@ -30,6 +31,11 @@ var IDE = (function() {
         elems.demo[0].width = elems.demo.width() * ratio;
         elems.demo[0].height = elems.demo.height() * ratio;
         demo.setResolution(elems.demo[0].width, elems.demo[0].height);
+    }
+
+    function setTheme(elems, editor) {
+        var val = elems.theme.val();
+        editor.setTheme(val);
     }
 
     function createEditor(element) {
