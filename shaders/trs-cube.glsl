@@ -10,11 +10,10 @@ const vec3 camPos = vec3(0.0, 0.0, 1.5);
 const vec3 lightPos = vec3(1.0, 1.0, 1.0);
 const vec3 lightColor = vec3(1.4);
 const vec3 ambientLight = vec3(0.05);
-const vec3 shapeDiffuse = vec3(0.95, 0.2, 0.2);
-const vec3 shapeSpecular = vec3(0.7);
-const float shapeShininess = 16.0;
+const vec3 materialDiffuse = vec3(0.95, 0.2, 0.2);
+const vec3 materialSpecular = vec3(0.7);
+const float materialShininess = 16.0;
 
-// Create a rotation matrix given a pitch, yaw, and roll.
 mat3 rotateXYZ(float x, float y, float z) {
     float sx = sin(x), cx = cos(x);
     float sy = sin(y), cy = cos(y);
@@ -31,7 +30,7 @@ float cubeSDF(vec3 p, float s) {
     return min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
 }
 
-float scene(vec3 p) {
+float sceneSDF(vec3 p) {
     // Translate
     p -= vec3(1.0 * sin(time), 0.0, 0.0);
 
@@ -57,9 +56,9 @@ vec3 rayDirection() {
 vec3 getNormal(vec3 p) {
     float e = 0.001;
     vec3 n = vec3(
-        scene(vec3(p.x + e, p.y, p.z)) - scene(vec3(p.x - e, p.y, p.z)),
-        scene(vec3(p.x, p.y + e, p.z)) - scene(vec3(p.x, p.y - e, p.z)),
-        scene(vec3(p.x, p.y, p.z + e)) - scene(vec3(p.x, p.y, p.z - e))
+        sceneSDF(vec3(p.x + e, p.y, p.z)) - sceneSDF(vec3(p.x - e, p.y, p.z)),
+        sceneSDF(vec3(p.x, p.y + e, p.z)) - sceneSDF(vec3(p.x, p.y - e, p.z)),
+        sceneSDF(vec3(p.x, p.y, p.z + e)) - sceneSDF(vec3(p.x, p.y, p.z - e))
     );
     return normalize(n);
 }
@@ -71,10 +70,10 @@ vec3 getShading(vec3 p, vec3 n) {
 
     vec3 r = reflect(-l, n);
     vec3 c = normalize(camPos - p);
-    float iSpec = pow(max(dot(r, c), 0.0), shapeShininess);
+    float iSpec = pow(max(dot(r, c), 0.0), materialShininess);
     iSpec = clamp(iSpec, 0.0, 1.0);
 
-    return lightColor * (shapeDiffuse * iDiff + shapeSpecular * iSpec) +
+    return lightColor * (materialDiffuse * iDiff + materialSpecular * iSpec) +
         ambientLight;
 }
 
@@ -85,7 +84,7 @@ void main(void) {
     float t = 0.0;
     for (int i = 0; i < maxMarches; i++) {
         vec3 p = ro + rd * t;
-        float d = scene(p);
+        float d = sceneSDF(p);
         t += d;
 
         if (d < marchEpsilon) {
