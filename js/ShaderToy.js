@@ -101,8 +101,11 @@ var ShaderToy = (function() {
 
     function drawLoop() {
         window.requestAnimationFrame(drawLoop.bind(this));
-        if (!ready || !playing)
-            return
+        if (ready && playing)
+            draw();
+    }
+
+    function draw() {
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.viewport(0, 0, width, height);
         updateUniforms();
@@ -120,6 +123,8 @@ var ShaderToy = (function() {
     O.prototype.setResolution = function(w, h) {
         width = w;
         height = h;
+        if (!playing && ready)
+            draw();
     };
 
     O.prototype.load = function(vertexShaderSource, fragmentShaderSource) {
@@ -132,6 +137,8 @@ var ShaderToy = (function() {
         updatePosAttribute();
         uniforms = getUniforms();
         ready = true;
+        if (!playing)
+            draw();
     }
 
     return O;
