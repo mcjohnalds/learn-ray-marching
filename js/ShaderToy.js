@@ -20,9 +20,13 @@ var ShaderToy = (function() {
         height = canvas.height;
         startTime = Date.now() / 1000;
         positionBuffer = createPositionBuffer();
-        drawLoop();
+        images = loadImages(imagePaths).done((images) => {
+            textures = createTextures(imagePaths, images);
+            drawLoop();
+        });
     }
 
+    var imagePaths = ["/img/perlin.png"];
     var gl;
     var width;
     var height;
@@ -52,6 +56,26 @@ var ShaderToy = (function() {
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         return buffer;
+    }
+
+    function createTexture(image) {
+        var tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        return tex;
+    }
+
+    function createTextures(imagePaths, images) {
+        var texs = {};
+        for (var i = 0; i < imagePaths.length; i++) {
+            var path = imagePaths[i];
+            var name = path.split(/[\\/]/).pop(); // /img/a.png -> a.png
+            texs[name] = createTexture(images[i]);
+        }
+        return texs;
     }
 
     function createShader(type, source) {
@@ -86,7 +110,7 @@ var ShaderToy = (function() {
     }
 
     function getUniforms() {
-        var names = ["resolution", "time"];
+        var names = ["resolution", "time", "perlin"];
         var uniforms = {};
         names.forEach(function(name) {
             uniforms[name] = gl.getUniformLocation(program, name);
@@ -97,6 +121,10 @@ var ShaderToy = (function() {
     function updateUniforms() {
         gl.uniform2f(uniforms.resolution, width, height);
         gl.uniform1f(uniforms.time, Date.now() / 1000 - startTime);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, textures["perlin.png"]);
+        gl.uniform1i(uniforms.perlin, 0);
     }
 
     function drawLoop() {
