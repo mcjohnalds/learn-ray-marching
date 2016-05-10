@@ -4,18 +4,17 @@ uniform float time;
 const float pi = 3.1415926535897932384626433832795;
 const float fov = 80.0;
 const float marchDist = 1.0;
-const float minDist = 0.1;
+const float minDist = 1.0;
 const float maxDist = 700.0;
 const vec3 camPos = vec3(0.0, 40.0, 0.0);
+const vec3 skyColor = vec3(0.7, 0.75, 0.85);
 
 // The sky light emits straight downwards everywhere equally
-const vec3 skyLightColor = vec3(0.57, 0.87, 0.88) * 0.7;
+const vec3 skyLightColor = vec3(0.75, 0.75, 0.8) * 0.7;
 
 // Sun point light
-const vec3 sunLightPos = vec3(0.0, 10.0, 10.0);
-const vec3 sunLightColor = vec3(0.98, 0.87, 0.57) * 0.6;
-
-const vec3 materialColor = vec3(0.70, 0.95, 0.40);
+const vec3 sunLightPos = vec3(100.0, 40.0, -200.0);
+const vec3 sunLightColor = vec3(0.6);
 
 // Primitive hashing function. At least works ok with numbers on the order of
 // 10^-5 up to numbers on the order of 10^5. Outputs values between -1 and 1.
@@ -72,7 +71,7 @@ mat3 rotateXYZ(float x, float y, float z) {
 
 float terrain(float x, float z) {
     return pow(fbm(vec2(x + -3000., z) * 0.006, 1) * 30.0, 1.4) - 100. +
-            fbm(vec2(x + 1000., z) * 0.02, 1) * 10.0 +
+            fbm(vec2(x + 1000., z) * 0.02, 1) * 15.0 +
             fbm(vec2(x + 1000., z) * 0.09, 3) * 0.5;
 }
 
@@ -96,7 +95,7 @@ vec3 getShading(vec3 p, vec3 n) {
     float iSky = diffuse(p, n, p + vec3(0.0, 1.0, 0.0));
     float iSun = diffuse(p, n, sunLightPos);
 
-    return materialColor * (skyLightColor * iSky + sunLightColor * iSun);
+    return (skyLightColor * iSky + sunLightColor * iSun);
 }
 
 vec3 rayDirection() {
@@ -119,6 +118,56 @@ bool castRay(vec3 ro, vec3 rd, out float resT) {
     return false;
 }
 
+float snowPresenceAtHeight(float y) {
+    // Height we start to see snow
+    float snowGradientStart = -90.;
+    // Height after which everything becomes snow
+    float snowGradientEnd = 43.;
+    return smoothstep(snowGradientStart, snowGradientEnd, y);
+}
+
+vec3 material(vec3 p, vec3 n) {
+    // Blend between rock and snow. Higher up, more snow. Flatter land, more
+    // snow.
+    
+    float flatness = pow(n.y, 5.0);
+    vec3 snowColor = vec3(2.8);
+    vec3 rockColor = vec3(0.6);
+    float randMixing = fbm(vec2(p.x, p.z) * 0.01, 2) - 0.5;
+    randMixing += fbm(vec2(p.x * 1.5, p.z) * 0.05, 5) - 0.5;
+    randMixing *= 0.1;
+    float rockSnowMix = snowPresenceAtHeight(p.y) * flatness + randMixing;
+    vec3 rockAndSnow = mix(rockColor, snowColor, rockSnowMix);
+
+    // Blend grass and dirt to make 'girt'
+    
+    vec3 grassColor = vec3(0.70, 0.85, 0.40) * 0.8;
+    vec3 dirtColor = vec3(0.7, 0.7, 0.4) * 0.7;
+    float grassDirtMix = fbm(vec2(p.x + 5000., p.z) * 0.02, 2) * 0.6 +
+                         fbm(vec2(p.x, p.z) * 1.0, 3) * 0.4;
+    vec3 girt = mix(grassColor, dirtColor, grassDirtMix);
+        
+    // Blend between girt and rock. Higher up, more rock. Steeper cliff, more
+    // rock.
+    
+    float rockGradientStart = -100.;
+    float rockGradientEnd = -60.;
+    float rockPresenceAtHeight = smoothstep(rockGradientStart, rockGradientEnd, p.y);
+    float cliffness = pow(n.y, 30.0);
+    vec3 girtAndRock = mix(girt, rockAndSnow,
+                           rockPresenceAtHeight * (1. - cliffness));
+    
+    return girtAndRock;
+}
+
+vec3 applyFog(vec3 original, float dist) {
+    float density = 0.002;
+    float falloff = 4.;
+    float f = exp(-pow(dist * density, falloff));
+    f = clamp(f, 0.0, 1.);
+    return (1. - f) * skyColor + f * original; 
+}
+
 void main(void) {
     vec3 ro = camPos;
     vec3 rd = rotateXYZ(-0.6, 0.0, 0.0) * rayDirection();
@@ -128,8 +177,15 @@ void main(void) {
         vec3 p = ro + rd * t;
         vec3 n = getNormal(p);
         vec3 s = getShading(p, n);
-        gl_FragColor = vec4(s, 1.0);
+        vec3 m = material(p, n);
+        gl_FragColor = vec4(applyFog(m * s, t), 1.0);
     } else {
-        gl_FragColor = vec4(0.0);
+        vec3 sunColor = vec3(0.8, 0.75, 0.6) * 1.5;
+        float ar = resolution.x / resolution.y;
+        vec2 p = gl_FragCoord.xy / resolution;
+        p.x *= ar;
+        float gradient = length(p - vec2(1.2, 1.0));
+        float mixing = smoothstep(0., 0.1, gradient);
+        gl_FragColor = vec4(mix(sunColor, skyColor, mixing), 1.0);
     }
 }
