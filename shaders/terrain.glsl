@@ -3,18 +3,19 @@ uniform vec2 resolution;
 uniform float time;
 const float pi = 3.1415926535897932384626433832795;
 const float fov = 80.0;
-const float marchDist = 1.0;
+const float marchDist = 2.0;
+const float initialMarchDist = 1.0;
+const float marchTolerance = 0.02;
 const float minDist = 1.0;
 const float maxDist = 700.0;
 const vec3 camPos = vec3(0.0, -40.0, 0.0);
-const vec3 skyColor = vec3(0.7, 0.75, 0.85);
 
 // The sky light emits straight downwards everywhere equally
-const vec3 skyLightColor = vec3(0.75, 0.75, 0.8) * 0.7;
+const vec3 skyLightColor = vec3(0.75, 0.75, 0.8) * 0.9;
 
 // Sun point light
 const vec3 sunLightPos = vec3(100.0, 120.0, -1000.0);
-const vec3 sunLightColor = vec3(0.6);
+const vec3 sunLightColor = vec3(1.4);
 
 // Primitive hashing function. At least works ok with numbers on the order of
 // 10^-5 up to numbers on the order of 10^5. Outputs values between -1 and 1.
@@ -72,7 +73,7 @@ mat3 rotateXYZ(float x, float y, float z) {
 float terrain(float x, float z) {
     return pow(fbm(vec2(x + -3000., z) * 0.006, 1) * 30.0, 1.4) - 100. +
             fbm(vec2(x + 1000., z) * 0.02, 1) * 15.0 +
-            fbm(vec2(x + 1000., z) * 0.09, 3) * 0.5;
+            fbm(vec2(x + 1000., z) * 0.1, 5) * 0.5;
 }
 
 vec3 getNormal(vec3 p) {
@@ -123,12 +124,25 @@ vec3 rayDirection() {
 }
 
 bool castRay(vec3 ro, vec3 rd, out float resT) {
-    for (float t = minDist; t < maxDist; t += marchDist) {
+    float dt = initialMarchDist;
+    float lastH = terrain(ro.x, ro.z);
+    float lastY = ro.y;
+    // for (float t = minDist; t < maxDist; t += 0.) {
+    float t = minDist;
+    for (int i = 0; i >= 0; i++) { // Infinite loop
+        if (t >= maxDist) break;
         vec3 p = ro + rd * t;
-        if (p.y < terrain(p.x, p.z)) {
-            resT = t - 0.5 * marchDist;
+        float h = terrain(p.x, p.z);
+        if (p.y < h) {
+            // resT = t - 0.5 * dt;
+            // Interp between lastH and h
+            resT = t - dt + dt * (lastH - lastY) / (p.y - lastY - h + lastH); 
             return true;
         }
+        dt = marchTolerance * t;
+        t += dt;
+        lastH = h;
+        lastY = p.y;
     }
     return false;
 }
@@ -175,12 +189,19 @@ vec3 material(vec3 p, vec3 n) {
     return girtAndRock;
 }
 
+vec3 skyColor() {
+    vec3 blue = vec3(0.7, 0.75, 0.85) * 1.2;
+    vec3 red = vec3(0.8, 0.65, 0.7) * 1.5;
+    float y = gl_FragCoord.y / resolution.y;
+    return mix(red, blue, clamp(y - 0.2, 0., 1.));
+}
+
 vec3 applyFog(vec3 original, float dist) {
     float density = 0.002;
     float falloff = 4.;
     float f = exp(-pow(dist * density, falloff));
     f = clamp(f, 0.0, 1.);
-    return (1. - f) * skyColor + f * original; 
+    return (1. - f) * skyColor() + f * original; 
 }
 
 void main(void) {
@@ -201,6 +222,6 @@ void main(void) {
         p.x *= ar;
         float gradient = length(p - vec2(1.2, 1.0));
         float mixing = smoothstep(0., 0.1, gradient);
-        gl_FragColor = vec4(mix(sunColor, skyColor, mixing), 1.0);
+        gl_FragColor = vec4(mix(sunColor, skyColor(), mixing), 1.0);
     }
 }
