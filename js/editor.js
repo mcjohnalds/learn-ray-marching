@@ -5,6 +5,7 @@ $(window).load(function() {
         demo: $(".ide .demo"),
         footer: $(".ide footer"),
         output: $(".ide .output"),
+        file: $(".ide .file-selector"),
         resolution: $(".ide .resolution-selector"),
         theme: $(".ide .theme-selector"),
         playPause: $(".ide .play-pause-button"),

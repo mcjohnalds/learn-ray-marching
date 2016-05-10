@@ -15,7 +15,10 @@ var IDE = (function() {
                                       editor.getValue())
         });
         compileShader(elems, demo, defaultVSource, defaultFSource);
-        elems.resolution.change(() => setResolution(elems, demo))
+        elems.file.change(() => {
+            setFile(demo, editor, "shaders/" + elems.file.val() + ".glsl")
+        });
+        elems.resolution.change(() => setResolution(elems, demo));
         elems.theme.change(() => setTheme(elems, editor));
         elems.playPause.change(function() {
             if (this.checked)
@@ -31,6 +34,13 @@ var IDE = (function() {
         elems.demo[0].width = elems.demo.width() * ratio;
         elems.demo[0].height = elems.demo.height() * ratio;
         demo.setResolution(elems.demo[0].width, elems.demo[0].height);
+    }
+
+    function setFile(demo, editor, file) {
+        $.get(file, (code) => {
+            editor.setValue(code, -1);
+            demo.load(defaultVSource, code);
+        }, "text");
     }
 
     function setTheme(elems, editor) {
