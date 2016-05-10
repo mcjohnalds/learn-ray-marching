@@ -6,14 +6,14 @@ const float fov = 80.0;
 const float marchDist = 1.0;
 const float minDist = 1.0;
 const float maxDist = 700.0;
-const vec3 camPos = vec3(0.0, 40.0, 0.0);
+const vec3 camPos = vec3(0.0, -40.0, 0.0);
 const vec3 skyColor = vec3(0.7, 0.75, 0.85);
 
 // The sky light emits straight downwards everywhere equally
 const vec3 skyLightColor = vec3(0.75, 0.75, 0.8) * 0.7;
 
 // Sun point light
-const vec3 sunLightPos = vec3(100.0, 40.0, -200.0);
+const vec3 sunLightPos = vec3(100.0, 120.0, -1000.0);
 const vec3 sunLightColor = vec3(0.6);
 
 // Primitive hashing function. At least works ok with numbers on the order of
@@ -91,9 +91,24 @@ float diffuse(vec3 p, vec3 n, vec3 lightPos) {
     return clamp(iDiff, 0.0, 1.0);
 }
 
+float shadow(vec3 ro, vec3 rd) {
+    float k = 20.0;
+    float res = 1.0;
+    for (float t = minDist; t <= maxDist; t += marchDist) {
+        vec3 p = ro + rd * t;
+        float h = terrain(p.x, p.z);
+        if (p.y < h) {
+            return 0.0;
+        }
+        res = min(res, k * abs(p.y - h) / t);
+    }
+    return res;
+}
+
 vec3 getShading(vec3 p, vec3 n) {
     float iSky = diffuse(p, n, p + vec3(0.0, 1.0, 0.0));
-    float iSun = diffuse(p, n, sunLightPos);
+    float sh = shadow(p, normalize(sunLightPos - p));
+    float iSun = diffuse(p, n, sunLightPos) * sh;
 
     return (skyLightColor * iSky + sunLightColor * iSun);
 }
@@ -170,7 +185,7 @@ vec3 applyFog(vec3 original, float dist) {
 
 void main(void) {
     vec3 ro = camPos;
-    vec3 rd = rotateXYZ(-0.6, 0.0, 0.0) * rayDirection();
+    vec3 rd = rotateXYZ(-0.4, 0.0, 0.0) * rayDirection();
     
     float t;
     if (castRay(ro, rd, t)) {
