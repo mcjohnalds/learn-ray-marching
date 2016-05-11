@@ -24,6 +24,22 @@ var ShaderToy = (function() {
             textures = createTextures(imagePaths, images);
             drawLoop();
         });
+
+        var mouseIsDown = false;
+        $(canvas).mousedown((event) => {
+            updateCursorXY(canvas, event);
+            mouseIsDown = true;
+            draw();
+        });
+        $(canvas).mouseup((event) => {
+            mouseIsDown = false;
+        });
+        $(canvas).mousemove((event) => {
+            if (mouseIsDown) {
+                updateCursorXY(canvas, event);
+                draw();
+            }
+        });
     }
 
     var imagePaths = ["/img/perlin.png"];
@@ -36,6 +52,8 @@ var ShaderToy = (function() {
     var program;
     var playing = false;
     var ready = false;
+    var cursorX = 0.0;
+    var cursorY = 0.0;
 
     function getWebGLContext(canvas) {
         try {
@@ -43,6 +61,13 @@ var ShaderToy = (function() {
         } catch (e) {
             throw new WebGLContextError("Couldn't get WebGL context");
         }
+    }
+
+    function updateCursorXY(canvas, event) {
+        var zoom = width / $(canvas).width();
+        var rect = canvas.getBoundingClientRect();
+        cursorX = zoom * (event.clientX - rect.left);
+        cursorY = height - (zoom * (event.clientY - rect.top));
     }
 
     function createPositionBuffer() {
@@ -110,7 +135,7 @@ var ShaderToy = (function() {
     }
 
     function getUniforms() {
-        var names = ["resolution", "time", "perlin"];
+        var names = ["resolution", "time", "cursor", "perlin"];
         var uniforms = {};
         names.forEach(function(name) {
             uniforms[name] = gl.getUniformLocation(program, name);
@@ -121,6 +146,7 @@ var ShaderToy = (function() {
     function updateUniforms() {
         gl.uniform2f(uniforms.resolution, width, height);
         gl.uniform1f(uniforms.time, Date.now() / 1000 - startTime);
+        gl.uniform2f(uniforms.cursor, cursorX, cursorY);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, textures["perlin.png"]);
