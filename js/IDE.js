@@ -15,6 +15,9 @@ var IDE = (function() {
                                       editor.getValue())
         });
         compileShader(elems, demo, defaultVSource, defaultFSource);
+        elems.reloadFile.click(() => {
+            setFile(demo, editor, "shaders/" + elems.file.val() + ".glsl")
+        });
         elems.file.change(() => {
             setFile(demo, editor, "shaders/" + elems.file.val() + ".glsl")
         });
