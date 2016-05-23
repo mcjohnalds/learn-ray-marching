@@ -3,11 +3,11 @@ uniform vec2 resolution;
 uniform float time;
 uniform vec2 cursor;
 const float pi = 3.1415926535897932384626433832795;
-const float fov = 80.0;
+const float fov = 60.0;
 const float drawDistance = 500.0;
 const int maxMarches = 5000;
 const float marchEpsilon = 0.0001;
-const vec3 camPos = vec3(0.0, 25., 40.);
+const vec3 camPos = vec3(0.0, 25., 50.);
 
 int groundMat = 0;
 int buildingMat = 10;
@@ -105,12 +105,22 @@ Obj ground(vec3 p) {
 }
 
 Obj colosseum(vec3 p) {
-    float d = sdfCylinderY(p - vec3(0., 10., 0.), vec2(33., 11.));
-    d = opS(d, sdfCylinderY(p - vec3(0., 10.01, 0.), vec2(30.5, 11.)));
+    float d = 1e10;
 
-    float dArch = sdfBox(p - vec3(0., 0.51, 33.), vec3(1.8, 1.5, 3.));
-    dArch = opU(dArch, sdfCylinderZ(p - vec3(0., 2.01, 33.), vec2(1.8, 3.)));
-    d = opU(d, dArch);
+    vec3 pWalls = vec3(p.x, p.y, p.z);
+    pWalls.y -= 10.;
+    d = opU(d, sdfCylinderY(pWalls, vec2(33., 11.)));
+    pWalls.y -= 0.01;
+    d = opS(d, sdfCylinderY(pWalls, vec2(30.5, 11.)));
+
+    vec3 pArch = vec3(p.x, p.y, p.z);
+    pArch.y -= 0.9;
+    pModPolar(pArch.xz, 36.);
+    pArch.x -= 33.;
+    float dArch = sdfBox(pArch, vec3(3., 1.7, 1.9));
+    pArch.y -= 1.5;
+    dArch = opU(dArch, sdfCylinderX(pArch, vec2(1.9, 3.)));
+    d = opS(d, dArch);
 
     return Obj(d, buildingMat);
 }
