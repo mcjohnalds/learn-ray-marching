@@ -40,10 +40,14 @@ var IDE = (function() {
     }
 
     function setFile(elems, demo, editor, file) {
-        $.get(file, (code) => {
-            editor.setValue(code, -1);
-            compileShader(elems, demo, defaultVSource, editor.getValue());
-        }, "text");
+        $.ajax({
+            url: file,
+            success: (code) => {
+                editor.setValue(code, -1);
+                compileShader(elems, demo, defaultVSource, editor.getValue());
+            },
+            cache: false,
+        });
     }
 
     function setTheme(elems, editor) {
