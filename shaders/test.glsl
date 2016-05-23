@@ -79,24 +79,24 @@ float sdfCylinderZ(vec3 p, vec2 h) {
   return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
 }
 
-// Repeat around the origin by a fixed angle.
-// For easier use, num of repetitions is use to specify the angle.
-float pModPolar(inout vec2 p, float repetitions) {
-    float angle = 2.0 * pi /repetitions;
-    float a = atan(p.y, p.x) + angle / 2.;
-    float r = length(p);
-    float c = floor(a/angle);
-    a = mod(a,angle) - angle / 2.;
-    p = vec2(cos(a), sin(a))*r;
-    // For an odd number of repetitions, fix cell index of the cell in -x direction
-    // (cell index would be e.g. -5 and 5 in the two halves of the cell):
-    if (abs(c) >= (repetitions / 2.)) c = abs(c);
-    return c;
-}
-
 vec3 opRepX(vec3 p, float c) {
     p.x = mod(p.x, c) - c * 0.5;
     return p;
+}
+
+// Repeat around the origin by a fixed angle.
+// For easier use, num of repetitions is use to specify the angle.
+float pModPolar(inout vec2 p, float repetitions) {
+	float angle = 2. * pi / repetitions;
+	float a = atan(p.y, p.x) + angle/2.;
+	float r = length(p);
+	float c = floor(a / angle);
+	a = mod(a, angle) - angle / 2.;
+	p = vec2(cos(a), sin(a)) * r;
+	// For an odd number of repetitions, fix cell index of the cell in -x direction
+	// (cell index would be e.g. -5 and 5 in the two halves of the cell):
+	if (abs(c) >= (repetitions / 2.)) c = abs(c);
+	return c;
 }
 
 Obj ground(vec3 p) {
@@ -104,19 +104,18 @@ Obj ground(vec3 p) {
     return Obj(d, groundMat);
 }
 
-Obj colosseum(vec3 p) {
-    float d = sdfCylinderY(p - vec3(0., 10., 0.), vec2(33., 11.));
-    d = opS(d, sdfCylinderY(p - vec3(0., 10.01, 0.), vec2(30.5, 11.)));
-
-    float dArch = sdfBox(p - vec3(0., 0.51, 33.), vec3(1.8, 1.5, 3.));
-    dArch = opU(dArch, sdfCylinderZ(p - vec3(0., 2.01, 33.), vec2(1.8, 3.)));
-    d = opU(d, dArch);
-
+Obj test(vec3 p) {
+    pModPolar(p.xz, 5.);
+    p.x -= 10.;
+    pModPolar(p.xy, 5.);
+    p.y -= 1.;
+    float d = sdfBox(p, vec3(5.));
     return Obj(d, buildingMat);
 }
 
 Obj sdfScene(vec3 p) {
-    return opUObj(ground(p), colosseum(p));
+    // return opUObj(ground(p), test(p));
+    return test(p);
 }
 
 vec3 rayDirection() {
