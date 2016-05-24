@@ -6,7 +6,7 @@ const float pi = 3.1415926535897932384626433832795;
 const float fov = 80.0;
 const float drawDistance = 500.0;
 const int maxMarches = 5000;
-const float marchEpsilon = 0.00001;
+const float marchEpsilon = 0.0001;
 const vec3 camPos = vec3(0.0, 25., 40.);
 
 int groundMat = 0;
@@ -104,16 +104,12 @@ Obj ground(vec3 p) {
     return Obj(d, groundMat);
 }
 
-Obj test(vec3 p) {
-    pModPolar(p.xz, 5.);
-    p.x -= 7.;
-    float d = sdfBox(p, vec3(5.));
-    return Obj(d, buildingMat);
-}
-
 Obj sdfScene(vec3 p) {
-    // return opUObj(ground(p), test(p));
-    return test(p);
+    float a = atan(p.y, p.x);
+    p.x += 20. * cos(a);
+    // p.x -= 20.;
+    float d = sdfBox(p, vec3(20., 5., 3.5));
+    return Obj(d, buildingMat);
 }
 
 vec3 rayDirection() {

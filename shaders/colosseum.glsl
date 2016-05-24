@@ -5,7 +5,7 @@ uniform vec2 cursor;
 const float pi = 3.1415926535897932384626433832795;
 const float fov = 60.0;
 const float drawDistance = 500.0;
-const int maxMarches = 5000;
+const int maxMarches = 500;
 const float marchEpsilon = 0.0001;
 const vec3 camPos = vec3(0.0, 25., 50.);
 
@@ -104,23 +104,44 @@ Obj ground(vec3 p) {
     return Obj(d, groundMat);
 }
 
+// Wall with outer radius r width w and height h.
+float colosseumWall(vec3 p, float r, float w) {
+    const float height = 11.;
+    float d = sdfCylinderY(p, vec2(r, height));
+    p.y -= 0.01;
+    return opS(d, sdfCylinderY(p, vec2(r - w, height)));
+}
+
+float colosseumWalls(vec3 p) {
+    p.y -= 10.1;
+    float d = 1e10;
+
+    float h = 11.;
+    float r = 33.;
+    float w = 1.5;
+    for (int i = 0; i < 4; i++) {
+        d = opU(d, colosseumWall(p, r, w));
+        r -= 3. * w;
+    }
+
+    return d;
+}
+
+float colosseumArches(vec3 p) {
+    p.y -= 0.9;
+    pModPolar(p.xz, 36.);
+    p.x -= 33.;
+    float d = sdfBox(p, vec3(33., 1.7, 1.9));
+    p.y -= 1.5;
+    d = opU(d, sdfCylinderX(p, vec2(1.9, 33.)));
+    return d;
+}
+
 Obj colosseum(vec3 p) {
     float d = 1e10;
 
-    vec3 pWalls = vec3(p.x, p.y, p.z);
-    pWalls.y -= 10.;
-    d = opU(d, sdfCylinderY(pWalls, vec2(33., 11.)));
-    pWalls.y -= 0.01;
-    d = opS(d, sdfCylinderY(pWalls, vec2(30.5, 11.)));
-
-    vec3 pArch = vec3(p.x, p.y, p.z);
-    pArch.y -= 0.9;
-    pModPolar(pArch.xz, 36.);
-    pArch.x -= 33.;
-    float dArch = sdfBox(pArch, vec3(3., 1.7, 1.9));
-    pArch.y -= 1.5;
-    dArch = opU(dArch, sdfCylinderX(pArch, vec2(1.9, 3.)));
-    d = opS(d, dArch);
+    d = opU(d, colosseumWalls(p));
+    d = opS(d, colosseumArches(p));
 
     return Obj(d, buildingMat);
 }
@@ -162,7 +183,7 @@ float specular(vec3 p, vec3 n, float shininess, vec3 viewPos, vec3 lightPos) {
     return clamp(iSpec, 0.0, 1.0);
 }
 
-vec3 shading(vec3 p, vec3 n, int mat) {
+vec3 shading(vec3 p, vec3 n, int mat, int steps) {
     vec3 materialDiff;
     vec3 materialSpec;
     float shininess;
@@ -213,7 +234,7 @@ void main(void) {
 
         if (o.d < marchEpsilon) {
             vec3 n = normal(p);
-            vec3 s = shading(p, n, o.mat);
+            vec3 s = shading(p, n, o.mat, i);
             gl_FragColor = vec4(s, 1.0);
             break;
         }
