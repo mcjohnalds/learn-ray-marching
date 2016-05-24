@@ -75,7 +75,6 @@ body {
 
         // Align children vertically
         display: flex;
-        align-items: center;
 
         &.success {
             background-color: #A1D490;
@@ -88,6 +87,7 @@ body {
         .output {
             margin-right: auto;
             font-weight: bold;
+            max-width: 70%;
         }
 
         h1 {
