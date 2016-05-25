@@ -22,7 +22,7 @@
                 <button class="reload-file-button">Reload</button>
 
                 <select class="file-selector">
-                    {% assign files = "camera-rotation diffuse-sphere minimal-sphere rotate-xyz simple.glsl sphere-specular trs-cube union-intersect-subtract terrain city colosseum test mandelbrot" | split: " " %}
+                    {% assign files = "camera-rotation diffuse-sphere minimal-sphere rotate-xyz simple.glsl sphere-specular trs-cube union-intersect-subtract terrain city colosseum test mandelbrot tetrahedron" | split: " " %}
                     {% for file in files %}
                         <option value="{{ file }}">{{ file }}</option>
                     {% endfor %}
