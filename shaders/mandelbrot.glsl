@@ -45,15 +45,15 @@ void main(void) {
         // z = z^2 + c
         z = complexMul(z, z) + c;
 
-        if (dot(z, z) > 1000.)
+        if (dot(z, z) > 4.)
             break; // z diverged
     }
     // Now either z converged to its limit or it diverged
 
     // d is the distance of c from mandelbrot boundary
-    //     d = |z| / |z'| * log|z|
+    //     d = 0.5 * |z| / |z'| * log|z|
     // where |z| is the complex modulus
-    float d = sqrt(dot(z, z) / dot(dz, dz)) * log(length(z));
+    float d = 0.5 * sqrt(dot(z, z) / dot(dz, dz)) * log(length(z));
 
     // pi is the palette index: 0 <= pi <= 1
     float pi = clamp(d * 400., 0., 1.);
