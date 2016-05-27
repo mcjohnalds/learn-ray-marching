@@ -10,5 +10,6 @@ $(window).load(function() {
         resolution: $(".ide .resolution-selector"),
         theme: $(".ide .theme-selector"),
         playPause: $(".ide .play-pause-button"),
+        reset: $(".ide .reset"),
     });
 });

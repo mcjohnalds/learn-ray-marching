@@ -18,7 +18,8 @@ class ShaderToy {
         this.gl = this.getWebGLContext();
         this.width = canvas.width;
         this.height = canvas.height;
-        this.startTime = Date.now() / 1000;
+
+        this.reset();
 
         loadImages(this.imagePaths).done((images) => {
             this.textures = this.createTextures(images);
@@ -48,6 +49,12 @@ class ShaderToy {
         this.playing = true;
     }
 
+    reset() {
+        this.cursorX = 0.0;
+        this.cursorY = 0.0;
+        this.startTime = Date.now() / 1000;
+    }
+
     setResolution(w, h) {
         this.width = w;
         this.height = h;
@@ -57,6 +64,7 @@ class ShaderToy {
 
     load(vertexShaderSource, fragmentShaderSource) {
         var gl = this.gl;
+        this.reset();
         if (this.program !== null) this.program.delete();
         this.program = new ShaderProgram({
             gl: gl,

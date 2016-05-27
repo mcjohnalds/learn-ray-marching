@@ -29,6 +29,10 @@ var IDE = (function() {
             else
                 demo.pause();
         });
+        elems.reset.click(() => {
+            demo.reset();
+            demo.draw();
+        });
     }
 
     function setResolution(elems, demo) {
