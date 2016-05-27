@@ -1,16 +1,29 @@
 precision mediump float;
 uniform vec2 resolution;
+uniform float time;
+uniform vec2 cursor;
 const float pi = 3.1415926535897932384626433832795;
-const vec3 camPos = vec3(0., 0., 2.);
-const float fov = 60.;
-const int maxMarches = 100000;
-const float marchEpsilon = 0.0001;
+const vec3 camPos = vec3(0., 0., 1.9);
+const vec2 shapeRotation = vec2(0.3, 0.1);
+const int maxMarches = 300;
 const float drawDistance = 10.;
+
+mat3 rotateXYZ(float x, float y, float z) {
+    float sx = sin(x), cx = cos(x);
+    float sy = sin(y), cy = cos(y);
+    float sz = sin(z), cz = cos(z);
+    return mat3(
+        cy * cz, cy * sz, -sy,
+        cz * sx * sy - cx * sz, cx * cz + sx * sy * sz, cy * sx,
+        cx * cz * sy + sx * sz, -cz * sx + cx * sy * sz, cx * cy);
+}
 
 float distFunc(vec3 pos) {
     const float power = 8.;
     const float bailout = 5.;
     const int iterations = 50;
+
+    pos = rotateXYZ(shapeRotation.x, shapeRotation.y, 0.) * pos;
 
 	vec3 z = pos;
 	float r;
@@ -44,7 +57,7 @@ float distFunc(vec3 pos) {
     return 0.5 * log(r) * r / dr;
 }
 
-vec3 rayDirection() {
+vec3 rayDirection(float fov) {
     vec2 ndc = gl_FragCoord.xy / resolution; // 0 <= ndc <= 1
     vec2 screen = 2. * ndc - 1.; // -1 <= screen <= 1
     float ar = resolution.x / resolution.y; // aspect ratio
@@ -62,31 +75,16 @@ vec3 normal(vec3 p) {
     return normalize(n);
 }
 
-float diffuse(vec3 p, vec3 n, vec3 lightPos) {
-    vec3 l = normalize(lightPos - p);
-    float iDiff = max(dot(n, l), 0.);
-    return clamp(iDiff, 0., 1.);
-}
-
-float specular(vec3 p, vec3 n, float shininess, vec3 viewPos, vec3 lightPos) {
-    vec3 l = normalize(lightPos - p);
-    vec3 r = reflect(-l, n);
-    vec3 c = normalize(viewPos - p);
-    float iSpec = pow(max(dot(r, c), 0.), shininess);
-    return clamp(iSpec, 0., 1.);
-}
-
-vec3 shading(vec3 p, vec3 n) {
-    float diff = diffuse(p, n, camPos);
-    float spec = specular(p, n, 100., camPos, camPos);
-    return vec3(diff * 0.9 + spec * 0.9 + 0.1);
-}
-
 void main(void) {
-    gl_FragColor = vec4(0.2, 0.2, 0.7, 1.);
+    gl_FragColor = vec4(0.6, 0.6, 0.85, 1.);
+
+    // float scale = 1. / (time + 1.);
+    float scale = 1.;
+    float fov = 60. * scale;
+    float marchEpsilon = 0.0001 * scale;
 
     vec3 ro = camPos;
-    vec3 rd = rayDirection();
+    vec3 rd = rayDirection(fov);
 
     float t = 0.;
     for (int i = 0; i < maxMarches; i++) {
@@ -95,9 +93,8 @@ void main(void) {
         t += d;
 
         if (d < marchEpsilon) {
-            vec3 n = normal(p);
-            vec3 s = shading(p, n);
-            gl_FragColor = vec4(s, 1.);
+            float occlusion = clamp(float(i) * 0.005, 0., 1.);
+            gl_FragColor = vec4(vec3(1. - occlusion), 1.);
             break;
         }
 
