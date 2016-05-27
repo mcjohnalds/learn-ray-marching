@@ -4,9 +4,12 @@ uniform float time;
 uniform vec2 cursor;
 const float pi = 3.1415926535897932384626433832795;
 const vec3 camPos = vec3(0., 0., 1.9);
-const vec2 shapeRotation = vec2(0.3, 0.1);
-const int maxMarches = 300;
+const vec2 shapeRotation = vec2(0.98, 0.5);
+const int maxMarches = 500;
 const float drawDistance = 10.;
+
+// 0 <= fudgeFactor <= 1. Lower values irons out artifacts
+const float fudgeFactor = 0.9;
 
 mat3 rotateXYZ(float x, float y, float z) {
     float sx = sin(x), cx = cos(x);
@@ -23,6 +26,7 @@ float distFunc(vec3 pos) {
     const float bailout = 5.;
     const int iterations = 50;
 
+    // Rotate the shape
     pos = rotateXYZ(shapeRotation.x, shapeRotation.y, 0.) * pos;
 
 	vec3 z = pos;
@@ -66,6 +70,7 @@ vec3 rayDirection(float fov) {
     return normalize(world);
 }
 
+// Compute surface normal using central differences method.
 vec3 normal(vec3 p) {
     vec2 eps = vec2(0.0001, 0.);
     vec3 n = vec3(
@@ -76,12 +81,11 @@ vec3 normal(vec3 p) {
 }
 
 void main(void) {
-    gl_FragColor = vec4(0.6, 0.6, 0.85, 1.);
+    gl_FragColor = vec4(0.7, 0.75, 0.9, 1.);
 
-    float scale = 1. / (time + 0.);
-    // float scale = 1.;
+    float scale = 1. / (pow(time, 2.) * 0.1 + 1.);
     float fov = 60. * scale;
-    float marchEpsilon = 0.0001 * scale;
+    float marchEpsilon = 0.0007 * scale;
 
     vec3 ro = camPos;
     vec3 rd = rayDirection(fov);
@@ -90,11 +94,13 @@ void main(void) {
     for (int i = 0; i < maxMarches; i++) {
         vec3 p = ro + rd * t;
         float d = distFunc(p);
-        t += d;
+        t += fudgeFactor * d;
 
         if (d < marchEpsilon) {
-            float occlusion = clamp(float(i) * 0.005, 0., 1.);
-            gl_FragColor = vec4(vec3(1. - occlusion), 1.);
+            // 0 = no shadow, 1 = complete shadow
+            float occlusion = clamp(float(i) * 0.008, 0., 1.);
+            vec3 color = vec3(1.0, 0.7, 0.8) * (1. - occlusion);
+            gl_FragColor = vec4(color, 1.);
             break;
         }
 
