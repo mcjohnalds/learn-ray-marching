@@ -5,34 +5,32 @@ class WebGLContextError {
     }
 }
 
-class ShaderCompileError {
-    constructor(m) {this.message = m;}
-}
-
-class ShaderLinkError {
-    constructor(m) {this.message = m;}
-}
-
 class ShaderToy {
     constructor(canvas) {
         this.imagePaths = ["/img/perlin.png"];
-        this.uniformNames = ["resolution", "time", "cursor", "perlin"];
         this.playing = false;
         this.ready = false;
         this.cursorX = 0.0;
         this.cursorY = 0.0;
+        this.program = null;
+
         this.canvas = canvas;
         this.gl = this.getWebGLContext();
         this.width = canvas.width;
         this.height = canvas.height;
         this.startTime = Date.now() / 1000;
-        this.positionBuffer = this.createPositionBuffer();
-        this.program = null;
 
         loadImages(this.imagePaths).done((images) => {
             this.textures = this.createTextures(images);
             this.drawLoop();
         });
+
+        this.positionVAO = new VAO(this.gl, [
+            [ 1.0,  1.0],
+            [-1.0,  1.0],
+            [ 1.0, -1.0],
+            [-1.0, -1.0],
+        ]);
 
         detectMouseDown(canvas, this.updateCursorXY.bind(this));
         detectMouseDrag(canvas, this.updateCursorXY.bind(this));
@@ -59,14 +57,15 @@ class ShaderToy {
 
     load(vertexShaderSource, fragmentShaderSource) {
         var gl = this.gl;
-        if (this.program) gl.deleteProgram(this.program);
-        var vShader = this.createShader(gl.VERTEX_SHADER, vertexShaderSource);
-        var fShader = this.createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
-        this.program = this.createProgram(vShader, fShader);
-        gl.detachShader(this.program, vShader);
-        gl.detachShader(this.program, fShader);
-        this.updatePosAttribute();
-        this.uniforms = this.getUniforms();
+        if (this.program !== null) this.program.delete();
+        this.program = new ShaderProgram({
+            gl: gl,
+            vertexShaderSource: vertexShaderSource,
+            fragmentShaderSource: fragmentShaderSource,
+            uniforms: ["resolution", "time", "cursor", "perlin"],
+            attributes: ["pos"],
+        });
+        this.program.setAttrib("pos", this.positionVAO);
         this.ready = true;
         if (!this.playing)
             this.draw();
@@ -89,21 +88,6 @@ class ShaderToy {
         } catch (e) {
             throw new WebGLContextError("Couldn't get WebGL context");
         }
-    }
-
-    createPositionBuffer() {
-        var gl = this.gl;
-        var buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        var vertices = [
-             1.0,  1.0,
-            -1.0,  1.0,
-             1.0, -1.0,
-            -1.0, -1.0,
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices),
-                      gl.STATIC_DRAW);
-        return buffer;
     }
 
     createTexture(image) {
@@ -129,58 +113,16 @@ class ShaderToy {
         return texs;
     }
 
-    createShader(type, source) {
-        var gl = this.gl;
-        console.assert(type === gl.VERTEX_SHADER || type === gl.FRAGMENT_SHADER);
-        console.assert(typeof source === "string");
-        var shader = gl.createShader(type);
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            throw new ShaderCompileError(gl.getShaderInfoLog(shader));
-        }
-        return shader;
-    }
-
-    createProgram(vShader, fShader) {
-        var gl = this.gl;
-        var p = gl.createProgram();
-        gl.attachShader(p, vShader);
-        gl.attachShader(p, fShader);
-        gl.linkProgram(p);
-        if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
-            throw new ShaderLinkError();
-        }
-        gl.useProgram(p);
-        return p;
-    }
-
-    updatePosAttribute() {
-        var gl = this.gl;
-        var pos = gl.getAttribLocation(this.program, "pos");
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-        gl.enableVertexAttribArray(pos);
-        gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-    }
-
-    getUniforms() {
-        var gl = this.gl;
-        var uniforms = {};
-        this.uniformNames.forEach((name) => {
-            uniforms[name] = gl.getUniformLocation(this.program, name);
-        });
-        return uniforms;
-    }
-
     updateUniforms() {
         var gl = this.gl;
-        gl.uniform2f(this.uniforms.resolution, this.width, this.height);
-        gl.uniform1f(this.uniforms.time, Date.now() / 1000 - this.startTime);
-        gl.uniform2f(this.uniforms.cursor, this.cursorX, this.cursorY);
+        var p = this.program;
+        p.setUniformVec2("resolution", this.width, this.height);
+        p.setUniformFloat("time", Date.now() / 1000 - this.startTime);
+        p.setUniformVec2("cursor", this.cursorX, this.cursorY);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.textures["perlin.png"]);
-        gl.uniform1i(this.uniforms.perlin, 0);
+        p.setUniformInt("perlin", 0);
     }
 
     drawLoop() {
@@ -194,6 +136,6 @@ class ShaderToy {
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.viewport(0, 0, this.width, this.height);
         this.updateUniforms();
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        this.program.drawTriangleStrip();
     }
 }
