@@ -1,14 +1,47 @@
 precision mediump float;
 uniform vec2 resolution;
 const float pi = 3.1415926535897932384626433832795;
-const vec3 camPos = vec3(0., 0., 5.);
-const float fov = 90.;
-const int maxMarches = 1000;
+const vec3 camPos = vec3(0., 0., 2.);
+const float fov = 60.;
+const int maxMarches = 100000;
 const float marchEpsilon = 0.0001;
 const float drawDistance = 10.;
 
-float distFunc(vec3 p) {
-    return length(p) - 1.;
+float distFunc(vec3 pos) {
+    const float power = 8.;
+    const float bailout = 5.;
+    const int iterations = 50;
+
+	vec3 z = pos;
+	float r;
+	float dr = 1.0;
+    for (int i = 0; i < iterations; i++) {
+		r = length(z);
+        if (r > bailout) break;
+
+        // Convert (z.x,z.y,z.z) to polar coords
+        float theta = acos(z.z / r);
+        float phi = atan(z.y, z.x);
+
+        dr =  pow(r, power - 1.) * power * dr + 1.;
+
+        // Find the spherical coords of z for z=z^power
+        float zr = pow(r, power);
+        theta = theta * power;
+        phi = phi * power;
+
+        // Convert (zr,theta,phi) to Cartesian coords
+        z = zr * vec3(
+                sin(theta) * cos(phi),
+                sin(phi) * sin(theta),
+                cos(theta));
+
+        // This is the c value in z=z^p+c
+        z += pos;
+    }
+
+    // Magic distance estimation formula
+    return 0.5 * log(r) * r / dr;
 }
 
 vec3 rayDirection() {
@@ -21,7 +54,7 @@ vec3 rayDirection() {
 }
 
 vec3 normal(vec3 p) {
-    vec2 eps = vec2(0.001, 0.);
+    vec2 eps = vec2(0.0001, 0.);
     vec3 n = vec3(
             distFunc(p + eps.xyy) - distFunc(p - eps.xyy),
             distFunc(p + eps.yxy) - distFunc(p - eps.yxy),
@@ -50,7 +83,7 @@ vec3 shading(vec3 p, vec3 n) {
 }
 
 void main(void) {
-    gl_FragColor = vec4(0.);
+    gl_FragColor = vec4(0.2, 0.2, 0.7, 1.);
 
     vec3 ro = camPos;
     vec3 rd = rayDirection();
