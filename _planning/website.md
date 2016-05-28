@@ -9,9 +9,8 @@
         - Diffuse lighting
 - Building Interesting Shapes
     - Different shapes
-    - Translation
-    - Rotation
-    - Scaling
+    - Translation, rotation, scaling
+    - Boolean operations
     - Repetition
     - Weird stuff
 - Shading
