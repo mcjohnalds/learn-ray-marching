@@ -1,0 +1,70 @@
+---
+---
+
+$page-width: 40em;
+$paragraph-padding: 1.0rem;
+$li-padding: 0.5rem;
+$small-caps-letter-spacing: 0.09em;
+
+html {
+    font-size: 1.25em;
+}
+
+body {
+    font-family: "Computer Modern Sans";
+    max-width: $page-width;
+    margin: 0 auto;
+}
+
+body > *, details, summary, section, p {
+    margin: $paragraph-padding 0;
+}
+
+li {
+    margin: $li-padding 0;
+}
+
+h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 1rem;
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+}
+
+h2 {
+    font-size: 1.35rem;
+    margin-top: 2.5rem;
+}
+
+h3 {
+    font-size: 1.2rem;
+    margin-top: 1.9rem;
+}
+
+.page-nav {
+    text-align: center;
+    padding-top: 1rem;
+    padding-bottom: 1.0rem;
+    border-style: groove;
+    border-width: 0 0 2px 0;
+}
+
+.go-to-previous {
+    float: left;
+    width: 33%;
+    text-align: left;
+}
+
+.go-to-toc {
+    width: 33%;
+}
+
+.go-to-next {
+    float: right;
+    width: 33%;
+    text-align: right;
+}

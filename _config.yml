@@ -8,4 +8,7 @@ url: "http://mcjohnalds.github.io/learn-ray-marching"
 github_username: mcjohnalds
 
 # Build settings
-markdown: kramdown
+# markdown: kramdown
+# 
+# kramdown:
+#   input: GFM

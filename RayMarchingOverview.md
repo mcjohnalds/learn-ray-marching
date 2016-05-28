@@ -75,20 +75,22 @@ We convert the raster coordinates of the pixels to its normalized device
 coordinates $\text{PNDC}$, so that $\text{PNDC}_x \in [0,1]$ and
 $\text{PNDC}_y \in [0,1]$.
 
-\[\text{PNDC} = \frac{\text{PRaster}}{\text{Resolution}}.\]
+$$\text{PNDC} = \frac{\text{PRaster}}{\text{Resolution}}.$$
 
 Then we convert to the screen space coordinates $\text{PScreen}$ which are
 $\text{PScreen}_x \in [-1,1]$ and $\text{PScreen}_y \in [-1,1]$.
 
-\[\text{PScreen} = 2 \cdot \text{PNDC} - (1,1).\]
+$$\text{PScreen} = 2 \cdot \text{PNDC} - (1,1).$$
 
 But we need to take into account the aspect ratio of the canvas
 $\text{AspectRatio}=\frac{\text{Resolution}_x}{\text{Resolution}_y}$ to find
 the world coordinates of the pixel
 
-\[\text{PWorld}_x = \text{PScreen}_x \cdot \text{AspectRatio},\]
-\[\text{PWorld}_y = \text{PScreen}_y,\]
-\[\text{PWorld}_z = -1.\]
+\begin{align\*}
+    \text{PWorld}_x &= \text{PScreen}_x \cdot \text{AspectRatio},\\\
+    \text{PWorld}_y &= \text{PScreen}_y,\\\
+    \text{PWorld}_z &= -1.
+\end{align\*}
 
 We have also assumed that the viewer is facing the direction $(0,0,-1)$. This
 choice is somewhat arbitrary but is customary in computer graphics we we'll
@@ -98,9 +100,11 @@ an angle that decides how much of the world the viewer can see. We come up
 with the field of view factor $f=\tan\left(\frac{\text{FieldOfView}}{2}\right)$
 and change $\text{PWorld}$ to
 
-\[\text{PWorld}_x = \text{PScreen}_x \cdot \text{AspectRatio} \cdot f,\]
-\[\text{PWorld}_y = \text{PScreen}_y \cdot f,\]
-\[\text{PWorld}_z = -1.\]
+\begin{align\*}
+    \text{PWorld}_x &= \text{PScreen}_x \cdot \text{AspectRatio} \cdot f,\\\
+    \text{PWorld}_y &= \text{PScreen}_y \cdot f,\\\
+    \text{PWorld}_z &= -1.
+\end{align\*}
 
 With these formulas, we can precisely lay out our ray marching algorithm.
 
@@ -183,17 +187,17 @@ states that given the parameters:
 - $\hat{N}$: Normal at the point on the surface (from the `getNormal` function)
 - $\hat{R}_m$: Direction a ray of light would take if it came from light source
   $m$ and bounced off the surface. This can be computed in GLSL with
-  $\text{\reflect}(-\hat{L}_m,\hat{N})$
+  $\text{reflect}(-\hat{L}_m,\hat{N})$
 - $\hat{V}$: Direction from the surface to the viewer
 
 The surface illumination is given by
 
-\[
+$$
     I_{\text{p}} = k_{\text{a}}i_{\text{a}} +
         \sum_{m\;\in \;{\text{lights}}}
             (k_{\text{d}}({\hat {L}}_{m}\cdot {\hat {N}})i_{m,{\text{d}}} +
             k_{\text{s}}({\hat {R}}_{m}\cdot {\hat {V}})^{\alpha }i_{m,{\text{s}}}).
-\]
+$$
 
 ### Putting it all together
 
