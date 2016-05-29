@@ -21,8 +21,10 @@ mat3 rotateXYZ(float x, float y, float z) {
         cx * cz * sy + sx * sz, -cz * sx + cx * sy * sz, cx * cy);
 }
 
+// Distance of pos to boundary of shape where shape is defined for all c
+// where z(n+1)=z^k+c diverges.
 float distFunc(vec3 pos) {
-    const float power = 8.;
+    const float k = 8.;
     const float bailout = 5.;
     const int iterations = 50;
 
@@ -40,12 +42,12 @@ float distFunc(vec3 pos) {
         float theta = acos(z.z / r);
         float phi = atan(z.y, z.x);
 
-        dr =  pow(r, power - 1.) * power * dr + 1.;
+        dr = k * pow(r, k - 1.) * dr + 1.;
 
-        // Find the spherical coords of z for z=z^power
-        float zr = pow(r, power);
-        theta = theta * power;
-        phi = phi * power;
+        // Find the spherical coords of z for z=z^k
+        float zr = pow(r, k);
+        theta = theta * k;
+        phi = phi * k;
 
         // Convert (zr,theta,phi) to Cartesian coords
         z = zr * vec3(
