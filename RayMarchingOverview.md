@@ -203,5 +203,7 @@ $$
 
 Armed with this information, we can build a fully working example:
 
+{% include toy.html shader="ray-marching-overview.glsl" caption="A caption" %}
+
 [shadertut]: http://gamedevelopment.tutsplus.com/tutorials/a-beginners-guide-to-coding-graphics-shaders--cms-23313 "A Beginner's Guide To Coding Graphics Shaders"
 [glslreference]: https://www.opengl.org/wiki/OpenGL_Shading_Language "OpenGL Shading Language"

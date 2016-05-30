@@ -22,7 +22,7 @@ class ShaderToy {
 
         this.reset();
 
-        loadImages(this.imagePaths).done((images) => {
+        this.imagesLoading = loadImages(this.imagePaths).done((images) => {
             this.textures = this.createTextures(images);
             this.drawLoop();
         });
@@ -64,20 +64,22 @@ class ShaderToy {
     }
 
     load(fragmentShaderSource) {
-        var gl = this.gl;
-        this.reset();
-        if (this.program !== null) this.program.delete();
-        this.program = new ShaderProgram({
-            gl: gl,
-            vertexShaderSource: this.vertexShaderSource,
-            fragmentShaderSource: fragmentShaderSource,
-            uniforms: ["resolution", "time", "cursor", "perlin"],
-            attributes: ["pos"],
+        this.imagesLoading.done(() => {
+            var gl = this.gl;
+            this.reset();
+            if (this.program !== null) this.program.delete();
+            this.program = new ShaderProgram({
+                gl: gl,
+                vertexShaderSource: this.vertexShaderSource,
+                fragmentShaderSource: fragmentShaderSource,
+                uniforms: ["resolution", "time", "cursor", "perlin"],
+                attributes: ["pos"],
+            });
+            this.program.setAttrib("pos", this.positionVAO);
+            this.ready = true;
+            if (!this.playing)
+                this.draw();
         });
-        this.program.setAttrib("pos", this.positionVAO);
-        this.ready = true;
-        if (!this.playing)
-            this.draw();
     }
 
     /*************************************************************************
