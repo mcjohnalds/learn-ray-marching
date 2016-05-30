@@ -164,13 +164,12 @@ close to `p`, which approximates the rate of change with respect to `p.x`,
 the gradient of the surface at `p`.
 
 ```glsl
-vec3 getNormal(vec3 p) {
-    float e = 0.001;
+vec3 normal(vec3 p) {
+    vec2 eps = vec2(0.0001, 0.);
     vec3 n = vec3(
-        sdfSphere(vec3(p.x + e, p.y, p.z)) - sdfSphere(vec3(p.x - e, p.y, p.z)),
-        sdfSphere(vec3(p.x, p.y + e, p.z)) - sdfSphere(vec3(p.x, p.y - e, p.z)),
-        sdfSphere(vec3(p.x, p.y, p.z + e)) - sdfSphere(vec3(p.x, p.y, p.z - e))
-    );
+            sdfSphere(p + eps.xyy, 2.) - sdfSphere(p - eps.xyy, 2.),
+            sdfSphere(p + eps.yxy, 2.) - sdfSphere(p - eps.yxy, 2.),
+            sdfSphere(p + eps.yyx, 2.) - sdfSphere(p - eps.yyx, 2.));
     return normalize(n);
 }
 ```
