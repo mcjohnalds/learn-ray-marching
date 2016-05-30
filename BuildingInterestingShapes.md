@@ -170,7 +170,11 @@ float sdfScene(vec3 p) {
 
 ### Weird stuff
 
-TODO
+### Putting it all together
+
+{% include toy.html
+   shader="building-interesting-shapes.glsl"
+   caption="Demonstration of distance function transformations" %}
 
 [distfunctions]: http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm "Modeling with distance functions"
 [modulo]: https://en.wikipedia.org/wiki/Modulo_operation "Modulo operation"
