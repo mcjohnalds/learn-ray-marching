@@ -21,6 +21,7 @@ class ShaderToy {
         this.height = canvas.height;
 
         this.reset();
+        this.setResolutionRatio(1);
 
         this.imagesFinishedLoading = false;
         this.imagesLoading = loadImages(this.imagePaths).done((images) => {
@@ -58,9 +59,13 @@ class ShaderToy {
         this.startTime = Date.now() / 1000;
     }
 
-    setResolution(w, h) {
-        this.width = w;
-        this.height = h;
+    setResolutionRatio(ratio) {
+        var width = $(this.canvas).width() * ratio;
+        var height = $(this.canvas).height() * ratio;
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.width = width;
+        this.height = height;
         if (!this.playing && this.ready)
             this.draw();
     }

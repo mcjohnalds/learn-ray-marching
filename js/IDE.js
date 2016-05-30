@@ -4,8 +4,8 @@ class IDE {
         this.elems = elems;
         this.editor = this.createEditor();
         this.toy = this.createShaderToy();
-        this.setResolution();
         this.compileShader();
+        this.updateResolutionRatio();
 
         elems.reloadFile.click(() => {
             this.setFile("shaders/" + elems.file.val() + ".glsl")
@@ -15,7 +15,7 @@ class IDE {
             this.setFile("shaders/" + elems.file.val() + ".glsl")
         });
 
-        elems.resolution.change(() => this.setResolution());
+        elems.resolution.change(() => this.updateResolutionRatio());
 
         elems.theme.change(() => this.setTheme());
 
@@ -51,12 +51,10 @@ class IDE {
      * Private methods
      *************************************************************************/
 
-    setResolution() {
-        var val = this.elems.resolution.val();
-        var ratio = parseFloat(val) / 100.0;
-        this.elems.toy[0].width = this.elems.toy.width() * ratio;
-        this.elems.toy[0].height = this.elems.toy.height() * ratio;
-        this.toy.setResolution(this.elems.toy[0].width, this.elems.toy[0].height);
+    updateResolutionRatio() {
+            var val = this.elems.resolution.val();
+            var ratio = parseFloat(val) / 100.0;
+            this.toy.setResolutionRatio(ratio)
     }
 
     setTheme() {
