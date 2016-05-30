@@ -7,7 +7,7 @@ class WebGLContextError {
 
 class ShaderToy {
     constructor(canvas) {
-        this.imagePaths = ["/img/perlin.png"];
+        this.imagePaths = ["img/perlin.png"];
         this.playing = false;
         this.ready = false;
         this.cursorX = 0.0;
