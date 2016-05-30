@@ -22,9 +22,11 @@ class ShaderToy {
 
         this.reset();
 
+        this.imagesFinishedLoading = false;
         this.imagesLoading = loadImages(this.imagePaths).done((images) => {
             this.textures = this.createTextures(images);
             this.drawLoop();
+            this.imagesFinishedLoading = true;
         });
 
         this.positionVAO = new VAO(this.gl, [
@@ -64,7 +66,7 @@ class ShaderToy {
     }
 
     load(fragmentShaderSource) {
-        this.imagesLoading.done(() => {
+        var loadShader = () => {
             var gl = this.gl;
             this.reset();
             if (this.program !== null) this.program.delete();
@@ -79,7 +81,12 @@ class ShaderToy {
             this.ready = true;
             if (!this.playing)
                 this.draw();
-        });
+        };
+
+        if (this.imagesFinishedLoading)
+            loadShader();
+        else
+            this.imagesLoading.done(loadShader);
     }
 
     /*************************************************************************
