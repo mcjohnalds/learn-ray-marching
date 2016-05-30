@@ -7,6 +7,7 @@ class WebGLContextError {
 
 class ShaderToy {
     constructor(canvas) {
+        this.vertexShaderSource = "attribute vec2 pos;void main(void){gl_Position=vec4(pos,0.,1.);}";
         this.imagePaths = ["img/perlin.png"];
         this.playing = false;
         this.ready = false;
@@ -62,13 +63,13 @@ class ShaderToy {
             this.draw();
     }
 
-    load(vertexShaderSource, fragmentShaderSource) {
+    load(fragmentShaderSource) {
         var gl = this.gl;
         this.reset();
         if (this.program !== null) this.program.delete();
         this.program = new ShaderProgram({
             gl: gl,
-            vertexShaderSource: vertexShaderSource,
+            vertexShaderSource: this.vertexShaderSource,
             fragmentShaderSource: fragmentShaderSource,
             uniforms: ["resolution", "time", "cursor", "perlin"],
             attributes: ["pos"],

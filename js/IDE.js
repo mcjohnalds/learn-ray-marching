@@ -1,5 +1,4 @@
 var IDE = (function() {
-    var defaultVSource = "attribute vec2 pos;\n\nvoid main(void) {\n    gl_Position = vec4(pos, 0.0, 1.0);\n}";
     var defaultFSource = "precision mediump float;\nuniform vec2 resolution;\n\nvoid main(void) {\n    vec2 uv = gl_FragCoord.xy / resolution.xy;\n    gl_FragColor = vec4(uv, 0.0, 1.0);\n}";
 
     function init(elems) {
@@ -11,10 +10,9 @@ var IDE = (function() {
                 win: "Alt-Enter",
                 mac: "Alt-Enter",
             },
-            exec: () => compileShader(elems, demo, defaultVSource,
-                                      editor.getValue())
+            exec: () => compileShader(elems, demo, editor.getValue())
         });
-        compileShader(elems, demo, defaultVSource, defaultFSource);
+        compileShader(elems, demo, defaultFSource);
         elems.reloadFile.click(() => {
             setFile(elems, demo, editor, "shaders/" + elems.file.val() + ".glsl")
         });
@@ -48,7 +46,7 @@ var IDE = (function() {
             url: file,
             success: (code) => {
                 editor.setValue(code, -1);
-                compileShader(elems, demo, defaultVSource, editor.getValue());
+                compileShader(elems, demo, editor.getValue());
             },
             cache: false,
         });
@@ -72,9 +70,9 @@ var IDE = (function() {
         return editor;
     }
 
-    function compileShader(elems, demo, vSource, fSource) {
+    function compileShader(elems, demo, fSource) {
         try {
-            demo.load(vSource, fSource);
+            demo.load(fSource);
             elems.output.text("Shader compiled successfuly");
             elems.footer.removeClass("fail");
             elems.footer.addClass("success");
