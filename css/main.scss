@@ -2,9 +2,14 @@
 ---
 
 $page-width: 40em;
-$paragraph-padding: 1.0rem;
+$p-padding: 1.0rem;
 $li-padding: 0.5rem;
 $small-caps-letter-spacing: 0.09em;
+$figure-width: 25rem;
+$figure-height: 20rem;
+$canvas-width: 8rem;
+$canvas-height: 8rem;
+$fig-background-color: #F8F8F8;
 
 html {
     font-size: 1.25em;
@@ -17,7 +22,7 @@ body {
 }
 
 body > *, details, summary, section, p {
-    margin: $paragraph-padding 0;
+    margin: $p-padding 0;
 }
 
 li {
@@ -67,4 +72,30 @@ h3 {
     float: right;
     width: 33%;
     text-align: right;
+}
+
+/*****************************************************************************
+ * Figure
+ *****************************************************************************/
+
+figure {
+    width: $figure-width;
+    height: $figure-height;
+    background-color: $fig-background-color;
+    margin: $p-padding auto;
+    padding: 0.5rem;
+
+    canvas {
+        width: 100%;
+        height: 100%;
+    }
+
+    figcaption {
+        position: relative;
+        padding: 0.5rem;
+        left: -0.5rem;
+        top: -0.5rem;
+        width: 100%;
+        background-color: $fig-background-color;
+    }
 }
