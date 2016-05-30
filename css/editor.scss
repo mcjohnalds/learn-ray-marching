@@ -46,17 +46,17 @@ body {
             width: 50%;
             height: 100%;
 
-            .demo-wrapper {
+            .toy-wrapper {
                 width: 100%;
                 height: 100%;
 
-                // Prevent potentional blurryness due to .editor-demo possibly
+                // Prevent potentional blurryness due to .editor-toy possibly
                 // at a 1/2 pixel offset
                 -webkit-transform-style: preserve-3d;
                 -moz-transform-style: preserve-3d;
                 transform-style: preserve-3d;
 
-                .demo {
+                .toy {
                     position: relative;
                     top: 50%;
                     transform: translateY(-50%);

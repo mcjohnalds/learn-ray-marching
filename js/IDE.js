@@ -1,64 +1,71 @@
-var IDE = (function() {
-    var defaultFSource = "precision mediump float;\nuniform vec2 resolution;\n\nvoid main(void) {\n    vec2 uv = gl_FragCoord.xy / resolution.xy;\n    gl_FragColor = vec4(uv, 0.0, 1.0);\n}";
+class IDE {
+    constructor(elems) {
+        this.defaultFSource = "precision mediump float;\nuniform vec2 resolution;\n\nvoid main(void) {\n    vec2 uv = gl_FragCoord.xy / resolution.xy;\n    gl_FragColor = vec4(uv, 0.0, 1.0);\n}";
+        this.elems = elems;
+        this.editor = this.createEditor();
+        this.toy = this.createShaderToy();
+        this.setResolution();
+        this.compileShader();
 
-    function init(elems) {
-        var editor = createEditor(elems.editor[0]);
-        var demo = createShaderDemo(elems);
-        editor.commands.addCommand({
-            name: "compile",
-            bindKey: {
-                win: "Alt-Enter",
-                mac: "Alt-Enter",
-            },
-            exec: () => compileShader(elems, demo, editor.getValue())
-        });
-        compileShader(elems, demo, defaultFSource);
         elems.reloadFile.click(() => {
-            setFile(elems, demo, editor, "shaders/" + elems.file.val() + ".glsl")
+            this.setFile("shaders/" + elems.file.val() + ".glsl")
         });
+
         elems.file.change(() => {
-            setFile(elems, demo, editor, "shaders/" + elems.file.val() + ".glsl")
+            this.setFile("shaders/" + elems.file.val() + ".glsl")
         });
-        elems.resolution.change(() => setResolution(elems, demo));
-        elems.theme.change(() => setTheme(elems, editor));
-        elems.playPause.change(function() {
-            if (this.checked)
-                demo.play();
+
+        elems.resolution.change(() => this.setResolution());
+
+        elems.theme.change(() => this.setTheme());
+
+        elems.playPause.change((e) => {
+            if (e.target.checked)
+                this.toy.play();
             else
-                demo.pause();
+                this.toy.pause();
         });
+
         elems.reset.click(() => {
-            demo.reset();
-            demo.draw();
+            this.toy.reset();
+            this.toy.draw();
         });
     }
 
-    function setResolution(elems, demo) {
-        var val = elems.resolution.val();
-        var ratio = parseFloat(val) / 100.0;
-        elems.demo[0].width = elems.demo.width() * ratio;
-        elems.demo[0].height = elems.demo.height() * ratio;
-        demo.setResolution(elems.demo[0].width, elems.demo[0].height);
-    }
+    /**************************************************************************
+     * Public methods
+     *************************************************************************/
 
-    function setFile(elems, demo, editor, file) {
+    setFile(file) {
         $.ajax({
             url: file,
             success: (code) => {
-                editor.setValue(code, -1);
-                compileShader(elems, demo, editor.getValue());
+                this.editor.setValue(code, -1);
+                this.compileShader();
             },
             cache: false,
         });
     }
 
-    function setTheme(elems, editor) {
-        var val = elems.theme.val();
-        editor.setTheme(val);
+    /**************************************************************************
+     * Private methods
+     *************************************************************************/
+
+    setResolution() {
+        var val = this.elems.resolution.val();
+        var ratio = parseFloat(val) / 100.0;
+        this.elems.toy[0].width = this.elems.toy.width() * ratio;
+        this.elems.toy[0].height = this.elems.toy.height() * ratio;
+        this.toy.setResolution(this.elems.toy[0].width, this.elems.toy[0].height);
     }
 
-    function createEditor(element) {
-        var editor = ace.edit(element);
+    setTheme() {
+        var val = this.elems.theme.val();
+        this.editor.setTheme(val);
+    }
+
+    createEditor() {
+        var editor = ace.edit(this.elems.editor[0]);
         editor.setTheme("ace/theme/github");
         editor.$blockScrolling = Infinity;
         editor.session.setMode("ace/mode/glsl");
@@ -66,33 +73,37 @@ var IDE = (function() {
             fontFamily: "Computer Modern Typewriter",
             fontSize: "12pt"
         });
-        editor.setValue(defaultFSource, -1);
+        editor.setValue(this.defaultFSource, -1);
+        editor.commands.addCommand({
+            name: "compile",
+            bindKey: {
+                win: "Alt-Enter",
+                mac: "Alt-Enter",
+            },
+            exec: () => this.compileShader()
+        });
         return editor;
     }
 
-    function compileShader(elems, demo, fSource) {
+    compileShader() {
         try {
-            demo.load(fSource);
-            elems.output.text("Shader compiled successfuly");
-            elems.footer.removeClass("fail");
-            elems.footer.addClass("success");
+            this.toy.load(this.editor.getValue());
+            this.elems.output.text("Shader compiled successfully");
+            this.elems.footer.removeClass("fail");
+            this.elems.footer.addClass("success");
         } catch (e) {
             if (e instanceof ShaderCompileError) {
-                elems.output.text(e.message);
-                elems.footer.removeClass("success");
-                elems.footer.addClass("fail");
+                this.elems.output.text(e.message);
+                this.elems.footer.removeClass("success");
+                this.elems.footer.addClass("fail");
             }
             else
                 throw e;
         }
     }
 
-    function createShaderDemo(elems) {
-        var demo = new ShaderToy(elems.demo[0]);
-        setResolution(elems, demo);
-        demo.play();
-        return demo;
+    createShaderToy() {
+        var toy = new ShaderToy(this.elems.toy[0]);
+        return toy;
     }
-
-    return {init: init};
-})();
+}

@@ -1,8 +1,9 @@
 $(window).load(function() {
-    $(".ide .resolution-selector option").each((i, e) => $(e).text($(e).val() + "%"));
-    IDE.init({
+    $(".ide .resolution-selector option")
+        .each((i, e) => $(e).text($(e).val() + "%"));
+    var ide = new IDE({
         editor: $(".ide .editor"),
-        demo: $(".ide .demo"),
+        toy: $(".ide .toy"),
         footer: $(".ide footer"),
         output: $(".ide .output"),
         reloadFile: $(".ide .reload-file-button"),
@@ -12,4 +13,7 @@ $(window).load(function() {
         playPause: $(".ide .play-pause-button"),
         reset: $(".ide .reset"),
     });
+    var shader = window.location.search.substring(1);
+    if (shader !== "")
+        ide.setFile("shaders/" + shader);
 });
