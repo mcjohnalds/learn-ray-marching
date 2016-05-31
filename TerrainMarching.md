@@ -199,3 +199,7 @@ gl_FragColor = vec4(mix(sunColor, skyColor, mixing), 1.0);
 ```
 
 ### Putting it all together
+
+{% include toy.html
+   shader="terrain-marching.glsl"
+   caption="Terrain marching shader." %}
