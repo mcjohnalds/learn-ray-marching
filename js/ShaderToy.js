@@ -11,8 +11,8 @@ class ShaderToy {
         this.imagePaths = ["img/perlin.png"];
         this.playing = false;
         this.ready = false;
-        this.cursorX = 0.0;
-        this.cursorY = 0.0;
+        this.cursorX = 0.5;
+        this.cursorY = 0.5;
         this.program = null;
 
         this.canvas = canvas;
@@ -54,8 +54,8 @@ class ShaderToy {
     }
 
     reset() {
-        this.cursorX = 0.0;
-        this.cursorY = 0.0;
+        this.cursorX = 0.5;
+        this.cursorY = 0.5;
         this.startTime = Date.now() / 1000;
     }
 
