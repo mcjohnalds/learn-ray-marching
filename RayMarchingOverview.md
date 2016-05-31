@@ -5,7 +5,18 @@ next: BuildingInterestingShapes
 next_title: Building Interesting Shapes
 ---
 
-### Introduction
+Ray marchers are a category of very cool rendering algorithms which let you
+draw all kinds of interesting scenes in 3D. This website explains how ray
+marching works, as well as many advanced details. You will learn about:
+
+- Sphere tracing.
+- Distance functions.
+- Distance function transformations.
+- Phong lighting.
+- Soft shadows.
+- Ambient occlusion.
+- Terrain marching.
+- Fractals.
 
 ### Fragment shaders
 
