@@ -38,5 +38,5 @@ void main(void) {
     float color = clamp(d * 600., 0., 1.);
     color = pow(color, 0.3); // Smooth edges
 
-    gl_FragColor = vec4(vec3(color), 1.);
+    gl_FragColor = vec4(0., 0., 0., 1. - color);
 }

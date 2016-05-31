@@ -21,7 +21,7 @@ void main(void) {
 
     for (int i = 0; i < 1000; i++) {
         if (dot(z, z) >= 4.) // z is diverging
-            gl_FragColor = vec4(1.);
+            gl_FragColor = vec4(0.);
 
         z = complexMul(z, z) + c;
     }

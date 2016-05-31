@@ -83,7 +83,7 @@ vec3 normal(vec3 p) {
 }
 
 void main(void) {
-    gl_FragColor = vec4(0.7, 0.75, 0.9, 1.);
+    gl_FragColor = vec4(0.);
 
     float scale = 1. / (pow(time, 2.) * 0.1 + 1.);
     float fov = 60. * scale;
