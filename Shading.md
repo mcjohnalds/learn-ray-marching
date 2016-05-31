@@ -147,3 +147,7 @@ float shadow(vec3 ro, vec3 rd, float distFromLight, float k) {
 ```
 
 ### Putting it all together
+
+{% include toy.html
+   shader="shading.glsl"
+   caption="Scene with soft shadows and a hint of AO." %}
