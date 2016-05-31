@@ -3,12 +3,12 @@ uniform vec2 resolution;
 uniform float time;
 const float pi = 3.1415926535897932384626433832795;
 const float fov = 80.0;
-const float marchDist = 2.0;
-const float initialMarchDist = 1.0;
+const float initialMarchDist = 1.0; // Initial marching distance per iteration
 const float marchTolerance = 0.02;
-const float minDist = 1.0;
-const float maxDist = 700.0;
-const vec3 camPos = vec3(0.0, -40.0, 0.0);
+const float minDist = 1.0; // Near clipping plane
+const float maxDist = 700.0; // Far clipping plane
+const float shadowRayMarchDist = 2.0; // Like initialMarchDist but for shadow()
+const vec3 eyePos = vec3(0.0, 0.0, 0.0);
 
 // The sky light emits straight downwards everywhere equally
 const vec3 skyLightColor = vec3(0.75, 0.75, 0.8) * 0.9;
@@ -70,13 +70,15 @@ mat3 rotateXYZ(float x, float y, float z) {
         cx * cz * sy + sx * sz, -cz * sx + cx * sy * sz, cx * cy);
 }
 
+// Terrain function. y=terrain(x,z).
 float terrain(float x, float z) {
     return pow(fbm(vec2(x + -3000., z) * 0.006, 1) * 30.0, 1.4) - 100. +
             fbm(vec2(x + 1000., z) * 0.02, 1) * 15.0 +
-            fbm(vec2(x + 1000., z) * 0.1, 5) * 0.5;
+            fbm(vec2(x + 1000., z) * 0.2, 6) * 0.25;
 }
 
-vec3 getNormal(vec3 p) {
+// Compute normal for point p of terrain.
+vec3 normal(vec3 p) {
     float e = 0.1;
     vec3 n = vec3(
         terrain(p.x - e, p.z) - terrain(p.x + e, p.z),
@@ -92,10 +94,11 @@ float diffuse(vec3 p, vec3 n, vec3 lightPos) {
     return clamp(iDiff, 0.0, 1.0);
 }
 
+// Soft shadows.
 float shadow(vec3 ro, vec3 rd) {
     float k = 20.0;
     float res = 1.0;
-    for (float t = minDist; t <= maxDist; t += marchDist) {
+    for (float t = minDist; t <= maxDist; t += shadowRayMarchDist) {
         vec3 p = ro + rd * t;
         float h = terrain(p.x, p.z);
         if (p.y < h) {
@@ -104,47 +107,6 @@ float shadow(vec3 ro, vec3 rd) {
         res = min(res, k * abs(p.y - h) / t);
     }
     return res;
-}
-
-vec3 getShading(vec3 p, vec3 n) {
-    float iSky = diffuse(p, n, p + vec3(0.0, 1.0, 0.0));
-    float sh = shadow(p, normalize(sunLightPos - p));
-    float iSun = diffuse(p, n, sunLightPos) * sh;
-
-    return (skyLightColor * iSky + sunLightColor * iSun);
-}
-
-vec3 rayDirection() {
-    vec2 ndc = gl_FragCoord.xy / resolution;
-    vec2 screen = 2.0 * ndc - 1.0;
-    float ar = resolution.x / resolution.y;
-    float f = tan(fov / 2.0 * pi / 180.0);
-    vec3 world = vec3(screen.x * ar * f, screen.y * f, -1);
-    return normalize(world);
-}
-
-bool castRay(vec3 ro, vec3 rd, out float resT) {
-    float dt = initialMarchDist;
-    float lastH = terrain(ro.x, ro.z);
-    float lastY = ro.y;
-    // for (float t = minDist; t < maxDist; t += 0.) {
-    float t = minDist;
-    for (int i = 0; i >= 0; i++) { // Infinite loop
-        if (t >= maxDist) break;
-        vec3 p = ro + rd * t;
-        float h = terrain(p.x, p.z);
-        if (p.y < h) {
-            // resT = t - 0.5 * dt;
-            // Interp between lastH and h
-            resT = t - dt + dt * (lastH - lastY) / (p.y - lastY - h + lastH); 
-            return true;
-        }
-        dt = marchTolerance * t;
-        t += dt;
-        lastH = h;
-        lastY = p.y;
-    }
-    return false;
 }
 
 float snowPresenceAtHeight(float y) {
@@ -189,6 +151,16 @@ vec3 material(vec3 p, vec3 n) {
     return girtAndRock;
 }
 
+vec3 rayDirection() {
+    vec2 ndc = gl_FragCoord.xy / resolution;
+    vec2 screen = 2.0 * ndc - 1.0;
+    float ar = resolution.x / resolution.y;
+    float f = tan(fov / 2.0 * pi / 180.0);
+    vec3 world = vec3(screen.x * ar * f, screen.y * f, -1);
+    return normalize(world);
+}
+
+// Vertical gradient
 vec3 skyColor() {
     vec3 blue = vec3(0.7, 0.75, 0.85) * 1.2;
     vec3 red = vec3(0.8, 0.65, 0.7) * 1.5;
@@ -196,6 +168,7 @@ vec3 skyColor() {
     return mix(red, blue, clamp(y - 0.2, 0., 1.));
 }
 
+// Apply fog to a shaded surface depending on distance of surface to eye.
 vec3 applyFog(vec3 original, float dist) {
     float density = 0.002;
     float falloff = 4.;
@@ -204,24 +177,58 @@ vec3 applyFog(vec3 original, float dist) {
     return (1. - f) * skyColor() + f * original; 
 }
 
+vec3 shadeTerrain(vec3 p, float t) {
+    vec3 n = normal(p);
+    
+    float iSky = diffuse(p, n, p + vec3(0.0, 1.0, 0.0));
+    float sh = shadow(p, normalize(sunLightPos - p));
+    float iSun = diffuse(p, n, sunLightPos) * sh;
+    vec3 lighting = skyLightColor * iSky + sunLightColor * iSun;
+    
+    vec3 m = material(p, n);
+    
+    return applyFog(m * lighting, t);
+}
+
+vec3 shadeSky() {
+    vec3 sunColor = vec3(0.8, 0.75, 0.6) * 1.5;
+    float ar = resolution.x / resolution.y;
+    vec2 p = gl_FragCoord.xy / resolution;
+    p.x *= ar;
+    float gradient = length(p - vec2(1.2, 1.0));
+    float mixing = smoothstep(0., 0.1, gradient);
+    return mix(sunColor, skyColor(), mixing);
+}
+
 void main(void) {
-    vec3 ro = camPos;
+    vec3 ro = eyePos;
     vec3 rd = rotateXYZ(-0.4, 0.0, 0.0) * rayDirection();
     
-    float t;
-    if (castRay(ro, rd, t)) {
+    float dt = initialMarchDist;
+    float lastH = terrain(ro.x, ro.z); // Keep track of h between iterations
+    float lastY = ro.y; // Keep track of y between iterations
+    float t = initialMarchDist;
+    bool hitTerrain = false;
+    for (int i = 0; i >= 0; i++) { // Infinite loop
+        if (t >= maxDist) break;
         vec3 p = ro + rd * t;
-        vec3 n = getNormal(p);
-        vec3 s = getShading(p, n);
-        vec3 m = material(p, n);
-        gl_FragColor = vec4(applyFog(m * s, t), 1.0);
-    } else {
-        vec3 sunColor = vec3(0.8, 0.75, 0.6) * 1.5;
-        float ar = resolution.x / resolution.y;
-        vec2 p = gl_FragCoord.xy / resolution;
-        p.x *= ar;
-        float gradient = length(p - vec2(1.2, 1.0));
-        float mixing = smoothstep(0., 0.1, gradient);
-        gl_FragColor = vec4(mix(sunColor, skyColor(), mixing), 1.0);
+        float h = terrain(p.x, p.z);
+        if (p.y < h) {
+            hitTerrain = true;
+            // Normally we'd do
+            //     t = t - 0.5 * dt;
+            // But we want to interp between lastH and h so:
+            t = t - dt + dt * (lastH - lastY) / (p.y - lastY - h + lastH);
+            break;
+        }
+        dt = marchTolerance * t; // Take larger and larger steps
+        t += dt;
+        lastH = h;
+        lastY = p.y;
     }
+    
+    if (hitTerrain)
+        gl_FragColor = vec4(shadeTerrain(ro + rd * t, t), 1.);
+    else
+        gl_FragColor = vec4(shadeSky(), 1.);
 }
