@@ -8,19 +8,23 @@
 
             <nav class="page-nav">
                 {% if page.previous %}
-                    <a class="go-to-previous" href="{{ page.previous }}.html">
+                    <a class="go-to-previous" href="{{ page.previous }}">
                         Previous chapter
                     </a>
                 {% else %}
                     <a class="go-to-previous">&nbsp;</a>
                 {% endif %}
 
-                <a class="go-to-toc" href="TableOfContents">
-                    Table of Contents
-                </a>
+                {% if page.no_toc_link %}
+                    <a class="go-to-toc">&nbsp;</a>
+                {% else %}
+                    <a class="go-to-toc" href="TableOfContents">
+                        Table of Contents
+                    </a>
+                {% endif %}
 
                 {% if page.next %}
-                    <a class="go-to-next" href="{{ page.next }}.html">
+                    <a class="go-to-next" href="{{ page.next }}">
                         Next chapter
                     </a>
                 {% else %}
