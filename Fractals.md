@@ -62,7 +62,9 @@ gl_FragColor = vec4(1.);
 This is the escape time algorithm, it's dumb and it produces rather ugly
 pictures like this:
 
-(insert pic)
+{% include toy.html
+   shader="mandelbrot-escape-time.glsl"
+   caption="Mandelbrot fractal drawn with the escape time algorithm." %}
 
 We can do better then that, in fact we can again use distance functions! The
 distance from $c$ to the boundary of the Mandelbrot set is
@@ -109,6 +111,10 @@ gl_FragColor = vec4(vec3(lightness), 1.);
 ```
 
 This has the effect of antialiasing the edges.
+
+{% include toy.html
+   shader="mandelbrot-dist-func.glsl"
+   caption="Mandelbrot fractal drawn with its distance function." %}
 
 \* Maybe $z$ has interesting features outside of this range, I'm not really
 sure.
@@ -165,7 +171,7 @@ $$
     z'_{n+1} = k z_n^{k-1} z'_n + 1
 $$
 
-With this, we can write our distance function for the Mandelbubl fractal as
+With this, we can write our distance function for the Mandelbulb fractal as
 
 ```glsl
 float distFunc(vec3 pos) {
@@ -206,7 +212,8 @@ float distFunc(vec3 pos) {
     return 0.5 * log(r) * r / dr;
 }
 ```
-
-(insert pic)
+{% include toy.html
+   shader="mandelbulb.glsl"
+   caption="Ray marched mandelbulb fractal." %}
 
 This concludes our exploration into ray marching.
