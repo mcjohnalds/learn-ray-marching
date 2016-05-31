@@ -14,7 +14,7 @@ class ShaderToy {
         this.cursorX = 0.5;
         this.cursorY = 0.5;
         this.program = null;
-
+        this.stopwatch = new Stopwatch();
         this.canvas = canvas;
         this.gl = this.getWebGLContext();
         this.width = canvas.width;
@@ -47,16 +47,20 @@ class ShaderToy {
 
     pause() {
         this.playing = false;
+        this.stopwatch.pause();
     }
 
     play() {
         this.playing = true;
+        this.stopwatch.start();
     }
 
     reset() {
         this.cursorX = 0.5;
         this.cursorY = 0.5;
-        this.startTime = Date.now() / 1000;
+        this.stopwatch.reset();
+        if (this.playing)
+            this.stopwatch.start();
     }
 
     setResolutionRatio(ratio) {
@@ -140,7 +144,7 @@ class ShaderToy {
         var gl = this.gl;
         var p = this.program;
         p.setUniformVec2("resolution", this.width, this.height);
-        p.setUniformFloat("time", Date.now() / 1000 - this.startTime);
+        p.setUniformFloat("time", this.stopwatch.seconds());
         p.setUniformVec2("cursor", this.cursorX, this.cursorY);
 
         gl.activeTexture(gl.TEXTURE0);
