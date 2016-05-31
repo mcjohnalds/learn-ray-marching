@@ -170,11 +170,74 @@ float sdfScene(vec3 p) {
 
 ### Weird stuff
 
+By applying some random operations on `p` and `d`, we can discover neat
+transformations. A shape can be skewed by increasing one of `p`'s axes by a
+multiple of another of `p`'s axes.
+
+```glsl
+float parallelogram(vec3 p) {
+    p.x -= p.y * 0.4;
+    return dfBox(p, vec3(3.));
+}
+```
+
+Increasing `d` in a periodic fashion by a quantity that depends on `p` gives
+curvy shapes.
+
+```glsl
+float wacky(vec3 p) {
+    float d = sdfCylinder(p, 2., 3.);
+    d += sin(p.x) * sin(p.y) * sin(p.z);
+    return d;
+}
+```
+
+Finally, multiplying some of `p`'s axes by a rotation matrix will twist a
+shape.
+
+```glsl
+vec3 twist(vec3 p) {
+    float c = cos(p.y);
+    float s = sin(p.y);
+    mat2 m = mat2(c, -s, s, c);
+    return vec3(m * p.xz, p.y);
+}
+
+float twistie(vec3 p) {
+    p = twist(p);
+    float d = sdfCylinder(p, 3., 1.);
+    return d;
+}
+```
+
+Unfortunately, transformations like these affects the rate of change of
+distance functions. If our distance function's rate of change exceeds 1, then
+the code
+
+```glsl
+vec3 p = ro + rd * t;
+float d = scene(p);
+t += d;
+```
+
+will sometimes cause `p` to penetrate through the surface of a shape, causing
+ugly artifacts. This can be solved by reducing how quickly we change our step
+size, for example,
+
+```glsl
+vec3 p = ro + rd * t;
+float d = scene(p);
+t += d / 2.;
+```
+
+will work fine as long as the rate of change of our `scene` distance function
+doesn't exceed 2.
+
 ### Putting it all together
 
 {% include toy.html
    shader="building-interesting-shapes.glsl"
-   caption="Demonstration of distance function transformations" %}
+   caption="Demonstration of distance function transformations on different shapes." %}
 
 [distfunctions]: http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm "Modeling with distance functions"
 [modulo]: https://en.wikipedia.org/wiki/Modulo_operation "Modulo operation"
