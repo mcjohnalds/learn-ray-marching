@@ -6,9 +6,7 @@ $p-padding: 1.0rem;
 $li-padding: 0.5rem;
 $small-caps-letter-spacing: 0.09em;
 $figure-width: 35rem;
-$figure-height: 25rem;
-$canvas-width: 8rem;
-$canvas-height: 8rem;
+$canvas-height: 25rem;
 $fig-background-color: #F8F8F8;
 
 html {
@@ -81,22 +79,42 @@ h3 {
 
 figure {
     width: $figure-width;
-    height: $figure-height;
     background-color: $fig-background-color;
     margin: $p-padding auto;
-    padding: 0.5rem 0.5rem 2rem 0.5rem;
+    padding: 0.5rem;
+    overflow: auto;
 
     canvas {
         width: 100%;
-        height: 100%;
+        height: $canvas-height;
+        padding: 0;
+        margin: 0;
     }
 
     figcaption {
+        display: block;
         position: relative;
         padding: 0.5rem;
         left: -0.5rem;
-        top: -0.5rem;
         width: 100%;
         background-color: $fig-background-color;
+
+        span {
+            float: left;
+            width: 79%;
+        }
+
+        a {
+            float: right;
+
+            // Look like a button
+            text-align: center;
+            padding: 0.3rem 0.5rem;
+            -webkit-appearance: button;
+            -moz-appearance: button;
+            appearance: button;
+            text-decoration: none;
+            color: initial;
+        }
     }
 }

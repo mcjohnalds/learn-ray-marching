@@ -1,4 +1,7 @@
 <figure>
     <canvas data-shader="{{ include.shader }}"></canvas>
-    <figcaption>{{ include.caption }}</figcaption>
+    <figcaption>
+        <span>{{ include.caption }}</span>
+        <a href="editor.html?{{ include.shader }}">Open in editor</a>
+    </figcaption>
 </figure>
