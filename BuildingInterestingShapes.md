@@ -168,6 +168,10 @@ float sdfScene(vec3 p) {
 }
 ```
 
+{% include toy.html
+    shader="infinite-spheres.glsl"
+    caption="An infinite plane of spheres." %}
+
 ### Weird stuff
 
 By applying some random operations on `p` and `d`, we can discover neat

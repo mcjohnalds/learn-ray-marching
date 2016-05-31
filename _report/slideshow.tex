@@ -7,6 +7,7 @@
 \author{John Owen}
 \date{}
 
+\newcommand\graphic[1]{\includegraphics[keepaspectratio=true,width=\textwidth]{../img/#1}}
 \newcommand\imageframe[1]{
     \begin{frame}[plain]
         \includegraphics[keepaspectratio=true,width=1\paperwidth]{../img/#1}
@@ -30,17 +31,13 @@
 
 \begin{frame}[fragile]
     \frametitle{Distance functions}
-    \begin{columns}
-        \column{.5\textwidth}
         Sphere:
     \begin{minted}[fontsize=\footnotesize]{glsl}
 float sdfSphere(vec3 p, float radius) {
   return length(p) - radius;
 }
     \end{minted}
-        \column{.5\textwidth}
-        \includegraphics[keepaspectratio=true,width=\textwidth]{../img/looking-outside-circle.png}
-    \end{columns}
+    \graphic{looking-outside-circle.png}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -87,6 +84,11 @@ void main() {
     \end{minted}
 \end{frame}
 
+\begin{frame}
+    \frametitle{Sphere Tracing Algorithm}
+    \graphic{ray-marching-overview.png}
+\end{frame}
+
 \begin{frame}[fragile]
     \frametitle{Translation}
     \begin{columns}
@@ -101,8 +103,116 @@ float sdfScene(vec3 p) {
 }
         \end{minted}
         \column{.5\textwidth}
-        (image)
+        \graphic{translated-sphere.png}
     \end{columns}
 \end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Rotation}
+    \begin{columns}
+        \column{.5\textwidth}
+        A shape can be rotated by transforming \texttt{p} with some simple
+        trigonometry:
+
+
+        \begin{minted}[fontsize=\footnotesize]{glsl}
+// Rotate around the y axis (yaw).
+vec3 rotateY(vec3 p, float a) {
+    float c = cos(a);
+    float s = sin(a);
+    float x = c * p.x + s * p.z;
+    float z = -s * p.x + c * p.z;
+    return vec3(x, p.y, z);
+}
+
+// A box with dimensions (2,1,1) rotated 45 degrees.
+float scene(vec3 p) {
+    p = rotateY(p, pi / 4.);
+    return sdfBox(p, vec3(2., 1., 1.));
+}
+        \end{minted}
+        \column{.5\textwidth}
+        \graphic{rotated-box.png}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Boolean Operations}
+    \begin{columns}
+        \column{.5\textwidth}
+        \begin{minted}[fontsize=\footnotesize]{glsl}
+// Box plus sphere.
+float scene(vec3 p) {
+    float d = dfBox(p, vec3(4.0));
+    d = min(d, sdfSphere(p, 2.5));
+    return d;
+}
+        \end{minted}
+        \column{.5\textwidth}
+        \graphic{box-plus-sphere.png}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Boolean Operations}
+    \begin{columns}
+        \column{.5\textwidth}
+        \begin{minted}[fontsize=\footnotesize]{glsl}
+// Subtract shape with distance d2 from the shape with distance d1.
+float opS(float d1, float d2) {
+    return max(d1, -d2);
+}
+
+// Box minus a sphere.
+float scene(vec3 p) {
+    float d = dfBox(p, vec3(4.0));
+    d = opS(d, sdfSphere(p, 2.5));
+    return d;
+}
+        \end{minted}
+        \column{.5\textwidth}
+        \graphic{box-minus-sphere.png}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Boolean Operations}
+    \begin{columns}
+        \column{.5\textwidth}
+        \begin{minted}[fontsize=\footnotesize]{glsl}
+// The shape that is the intersection of two shapes.
+float opI(float d1, float d2) {
+    return max(d1, d2);
+}
+
+// Intersection of box and sphere.
+float scene(vec3 p) {
+    float d = dfBox(p, vec3(4.0));
+    d = opI(d, sdfSphere(p, 2.5));
+    return d;
+}
+        \end{minted}
+        \column{.5\textwidth}
+        \graphic{box-intersect-sphere.png}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Repetition}
+    \begin{columns}
+        \column{.5\textwidth}
+        \begin{minted}[fontsize=\footnotesize]{glsl}
+float scene(vec3 p) {
+    float spacing = 10.;
+    p = mod(p, spacing) -
+        0.5 * spacing;
+    return sdfSphere(p, 0.5);
+}
+        \end{minted}
+        \column{.5\textwidth}
+        \graphic{infinite-spheres.png}
+    \end{columns}
+\end{frame}
+
 
 \end{document}
