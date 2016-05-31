@@ -214,6 +214,6 @@ float distFunc(vec3 pos) {
 ```
 {% include toy.html
    shader="mandelbulb.glsl"
-   caption="Ray marched mandelbulb fractal." %}
+   caption="Ray marched mandelbulb fractal. Click to rotate." %}
 
 This concludes our exploration into ray marching.
