@@ -20,7 +20,7 @@ const vec3 sunLightColor = vec3(1.4);
 // Primitive hashing function. At least works ok with numbers on the order of
 // 10^-5 up to numbers on the order of 10^5. Outputs values between -1 and 1.
 float hash(float n) {
-    return fract(sin(n) * 43758.5453);
+    return fract(sin(n) * 123.456);
 }
 
 // Static noise texture. Looks like the output of an analouge TV with no siganl.
@@ -72,9 +72,9 @@ mat3 rotateXYZ(float x, float y, float z) {
 
 // Terrain function. y=terrain(x,z).
 float terrain(float x, float z) {
-    return pow(fbm(vec2(x + -3000., z) * 0.006, 1) * 30.0, 1.4) - 100. +
-            fbm(vec2(x + 1000., z) * 0.02, 1) * 15.0 +
-            fbm(vec2(x + 1000., z) * 0.2, 6) * 0.25;
+    return pow(fbm(vec2(x + 3000., z) * 0.006, 1) * 30.0, 1.4) - 100. +
+            fbm(vec2(x, z) * 0.02, 1) * 15.0 +
+            fbm(vec2(x, z) * 0.2, 6) * 0.3;
 }
 
 // Compute normal for point p of terrain.
