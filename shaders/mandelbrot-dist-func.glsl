@@ -28,9 +28,8 @@ void main(void) {
         if (dot(z, z) > 4.)
             break; // z diverged
     }
-    // Now either z converged to its limit or it diverged
 
-    // d is the distance of c from mandelbrot boundary
+    // d is the distance of c from Mandelbrot boundary:
     //     d = 0.5 * |z| / |z'| * log|z|
     // where |z| is the complex modulus
     float d = 0.5 * sqrt(dot(z, z) / dot(dz, dz)) * log(length(z));

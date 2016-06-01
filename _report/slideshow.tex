@@ -8,9 +8,10 @@
 \date{}
 
 \newcommand\graphic[1]{\includegraphics[keepaspectratio=true,width=\textwidth]{../img/#1}}
-\newcommand\imageframe[1]{
-    \begin{frame}[plain]
-        \includegraphics[keepaspectratio=true,width=1\paperwidth]{../img/#1}
+\newcommand\imageframe[2]{
+    \begin{frame}
+        \frametitle{#1}
+        \includegraphics[keepaspectratio=true,width=0.95\textwidth]{../img/#2}
     \end{frame}
 }
 
@@ -18,32 +19,37 @@
 
 \frame{\titlepage}
 
-\imageframe{raymarch1.png}
-\imageframe{raymarch2.png}
-\imageframe{raymarch3.png}
-\imageframe{raymarch4.png}
-\imageframe{raymarch5.png}
-\imageframe{raymarch6.png}
-\imageframe{raymarch7.png}
-\imageframe{raymarch8.png}
-\imageframe{raymarch9.png}
-\imageframe{raymarch10.png}
 
 \begin{frame}[fragile]
     \frametitle{Distance functions}
-        Sphere:
+    Ray marching algorithms are rendering algorithms like rasterization or ray
+    tracing but instead of triangles and shape-ray intersection functions, ray
+    marching algorithms use distance functions, which take a point `p` and
+    return the distance of `p` to the boundary of the shape. For example, the
+    distance function of a sphere is:
     \begin{minted}[fontsize=\footnotesize]{glsl}
-float sdfSphere(vec3 p, float radius) {
+float sphere(vec3 p, float radius) {
   return length(p) - radius;
 }
     \end{minted}
     \graphic{looking-outside-circle.png}
 \end{frame}
 
+\imageframe{Sphere Tracing Algorithm}{raymarch1.png}
+\imageframe{Sphere Tracing Algorithm}{raymarch2.png}
+\imageframe{Sphere Tracing Algorithm}{raymarch3.png}
+\imageframe{Sphere Tracing Algorithm}{raymarch4.png}
+\imageframe{Sphere Tracing Algorithm}{raymarch5.png}
+\imageframe{Sphere Tracing Algorithm}{raymarch6.png}
+\imageframe{Sphere Tracing Algorithm}{raymarch7.png}
+\imageframe{Sphere Tracing Algorithm}{raymarch8.png}
+\imageframe{Sphere Tracing Algorithm}{raymarch9.png}
+\imageframe{Sphere Tracing Algorithm}{raymarch10.png}
+
 \begin{frame}[fragile]
     \frametitle{Distance functions}
     \begin{minted}[fontsize=\small]{glsl}
-float dfBox(vec3 p, vec3 size) {
+float box(vec3 p, vec3 size) {
   return length(max(abs(p) - size / 2., 0.));
 }
 
@@ -59,7 +65,6 @@ float sdfPlane(vec3 p, vec3 normal, float distance) {
     \end{minted}
 \end{frame}
 
-
 \begin{frame}[fragile]
     \frametitle{Sphere Tracing Algorithm}
     \begin{minted}[fontsize=\footnotesize]{glsl}
@@ -70,7 +75,7 @@ void main() {
   float t = 0.; // How far we've travelled along the ray so far
   for (int i = 0; i < 1000; i++) { // March 1000 times
     vec3 p = ro + rd * t; // The point along the ray we are at
-    float d = sdfSphere(p, 2.); // Distance of p to sphere of radius 2
+    float d = sphere(p, 2.); // Distance of p to sphere of radius 2
     t += d; // Move forward along the ray
     if (d < 0.001) { // If p close to boundary sphere
       // Compute the lighting, shadows, etc
@@ -97,9 +102,9 @@ void main() {
 
         \begin{minted}[fontsize=\footnotesize]{glsl}
 // A sphere of radius 2 at (-1,1,0).
-float sdfScene(vec3 p) {
+float scene(vec3 p) {
     p -= vec3(-1., 1., 0.);
-    return sdfSphere(p, 2.);
+    return sphere(p, 2.);
 }
         \end{minted}
         \column{.5\textwidth}
@@ -128,7 +133,7 @@ vec3 rotateY(vec3 p, float a) {
 // A box with dimensions (2,1,1) rotated 45 degrees.
 float scene(vec3 p) {
     p = rotateY(p, pi / 4.);
-    return sdfBox(p, vec3(2., 1., 1.));
+    return sbox(p, vec3(2., 1., 1.));
 }
         \end{minted}
         \column{.5\textwidth}
@@ -143,8 +148,8 @@ float scene(vec3 p) {
         \begin{minted}[fontsize=\footnotesize]{glsl}
 // Box plus sphere.
 float scene(vec3 p) {
-    float d = dfBox(p, vec3(4.0));
-    d = min(d, sdfSphere(p, 2.5));
+    float d = box(p, vec3(4.0));
+    d = min(d, sphere(p, 2.5));
     return d;
 }
         \end{minted}
@@ -165,8 +170,8 @@ float opS(float d1, float d2) {
 
 // Box minus a sphere.
 float scene(vec3 p) {
-    float d = dfBox(p, vec3(4.0));
-    d = opS(d, sdfSphere(p, 2.5));
+    float d = box(p, vec3(4.0));
+    d = opS(d, sphere(p, 2.5));
     return d;
 }
         \end{minted}
@@ -187,8 +192,8 @@ float opI(float d1, float d2) {
 
 // Intersection of box and sphere.
 float scene(vec3 p) {
-    float d = dfBox(p, vec3(4.0));
-    d = opI(d, sdfSphere(p, 2.5));
+    float d = box(p, vec3(4.0));
+    d = opI(d, sphere(p, 2.5));
     return d;
 }
         \end{minted}
@@ -206,7 +211,7 @@ float scene(vec3 p) {
     float spacing = 10.;
     p = mod(p, spacing) -
         0.5 * spacing;
-    return sdfSphere(p, 0.5);
+    return sphere(p, 0.5);
 }
         \end{minted}
         \column{.5\textwidth}
@@ -214,5 +219,143 @@ float scene(vec3 p) {
     \end{columns}
 \end{frame}
 
+\begin{frame}[fragile]
+    \frametitle{Building Interesting Shapes}
+    \graphic{building-interesting-shapes.png}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Terrain Marching}
+    \begin{columns}
+        \column{.5\textwidth}
+        \begin{minted}[fontsize=\footnotesize]{glsl}
+// y=terrain(x,z)
+float terrain(float x, float z) {
+    return sin(x) * sin(z);
+}
+        \end{minted}
+        \column{.5\textwidth}
+        \graphic{sinxcosz.png}
+    \end{columns}
+\end{frame}
+
+\imageframe{Terrain Marching Algorithm}{terrainmarch1.png}
+\imageframe{Terrain Marching Algorithm}{terrainmarch2.png}
+\imageframe{Terrain Marching Algorithm}{terrainmarch3.png}
+\imageframe{Terrain Marching Algorithm}{terrainmarch4.png}
+\imageframe{Terrain Marching Algorithm}{terrainmarch6.png}
+\imageframe{Terrain Marching Algorithm}{terrainmarch7.png}
+\imageframe{Terrain Marching Algorithm}{terrainmarch8.png}
+\imageframe{Terrain Marching Algorithm}{terrainmarch9.png}
+\imageframe{Terrain Marching Algorithm}{terrainmarch10.png}
+
+\begin{frame}[fragile]
+    \frametitle{Terrain Marching}
+    \begin{minted}[fontsize=\footnotesize]{glsl}
+void main() {
+    gl_FragColor = vec4(0.8, 0.85, 9.); // Sky color
+    vec3 ro = vec3(1., 0., 5.); // Ray origin
+    vec3 rd = rayDirection(); // Ray direction
+    float t = 0.;
+    const float dt = 0.001;
+    for (float t = 0.; t <= 1000.; t += dt) {
+        vec3 p = ro + rd * t;
+        if (p.y < terrain(p.x, p.z)) {
+            t = t - 0.5 * dt;
+            vec3 color = computeShadingForPoint(ro + rd * t);
+            gl_FragColor = vec4(color, 1.);
+        }
+    }
+}
+    \end{minted}
+\end{frame}
+
+\imageframe{Terrain Marching}{terrain-marching.png}
+
+\begin{frame}
+    \frametitle{The Mandelbrot Fractal}
+    \begin{columns}
+        \column{.75\textwidth}
+        Mandelbrot set is all values of $c$ where the sequence
+        \begin{gather*}
+            z_{n+1}=z_n^2+c,\\
+            z_1=0,
+        \end{gather*}
+        doesn't diverge, for $z_n,c\in\mathbb{C}$. If we map
+        \texttt{gl\_FragCoord.x} to $c$'s real part and \texttt{gl\_FragCoord.y}
+        to $c$'s imaginary part we can visualize this set. Algorithm for
+        drawing fractal:\\
+       
+        For each pixel mapped to $c$, compute $z_n$ for large $n$. If it
+        diverges, color it white otherwise
+        color it black.
+        \column{.4\textwidth}
+        \graphic{mandelbrot-escape-time.png}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{The Mandelbrot Fractal: Improved}
+    \begin{columns}
+        \column{.7\textwidth}
+        Improvement: Use distance functions. The distance from $c$ to the
+        boundary of the Mandelbrot set is
+        \[
+            d = \lim_{n\to\infty}
+                \frac{ \left|z_n\right| }{ \left|z'_n\right| }
+                \frac{ \ln \left|z_n\right| }{ 2 }
+        \]
+        where $z'_n$ is the rate of change of $z$ at $n$. We can
+        differentiate $z_n$ using the chain rule to get
+        \begin{gather*}
+            z'_{n+1} = 2z_nz'_n + 1,\\
+            z'_1 = 0.
+        \end{gather*}
+        Now we can use the distance $d$ to darken the points close to the edge
+        of the Mandelbrot set.
+        \column{.3\textwidth}
+        \graphic{mandelbrot-dist-func.png}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{The Mandelbulb Fractal}
+    \begin{columns}
+        \column{.5\textwidth}
+        Why restrict ourselves to 2D complex numbers?
+        \[
+            z=(z_x,z_y,z_z)
+        \]
+        \pause
+        But how do we define $z^2$? Well, for a complex number $w=a+bi$,
+        \[
+            w^k = r^k(\cos(k\phi)+i\sin(k\phi))
+        \]
+        where
+        \begin{gather*}
+            r=\sqrt{a^2+b^2},\\
+            \phi=\text{atan2}(b,a).
+        \end{gather*}
+        \column{.5\textwidth}
+        i.e, convert it to polar coordinates, take the magnitude to a power of $k$
+        and multiply the angle by $k$.
+        \pause
+        So for our triplex number $z$ we can do
+        \begin{gather*}
+            z_x^k = r^k\sin(k\theta)\cos(k\phi),\\
+            z_y^k = r^k\sin(k\phi)\sin(k\theta),\\
+            z_z^k = r^k\cos(k\theta).
+        \end{gather*}
+        where
+        \begin{gather*}
+            r=\sqrt{z_x^2+z_y^2+z_z^2},\\
+            \phi=\text{atan2}(z_y,z_x),\\
+            \theta=\text{acos}(z_z/r).
+        \end{gather*}
+    \end{columns}
+\end{frame}
+
+\imageframe{Mandelbulb $z_{n+1}=z_n^2+c$}{mandelbulb2.png}
+\imageframe{Mandelbulb $z_{n+1}=z_n^8+c$}{mandelbulb8.png}
 
 \end{document}

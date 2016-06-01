@@ -11,7 +11,7 @@ void main(void) {
     
     // We will find the values of c for which
     //     z(n+1) = z(n)^2 + c
-    // converge, where z and c are complex numbers.
+    // doesn't diverge, where z and c are complex numbers.
 
     vec2 c = gl_FragCoord.xy / resolution; // 0 <= c <= 1
     c.x = c.x * 3.5 - 2.5; // -2.5 <= c.x <= 1
@@ -20,8 +20,10 @@ void main(void) {
     vec2 z = vec2(0.);
 
     for (int i = 0; i < 1000; i++) {
-        if (dot(z, z) >= 4.) // z is diverging
-            gl_FragColor = vec4(0.);
+        if (dot(z, z) >= 4.) { // z is diverging
+            gl_FragColor = vec4(0.); // Transparent, looks nicer than white
+            break;
+        }
 
         z = complexMul(z, z) + c;
     }
