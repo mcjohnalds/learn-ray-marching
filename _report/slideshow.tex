@@ -24,9 +24,9 @@
     \frametitle{Distance functions}
     Ray marching algorithms are rendering algorithms like rasterization or ray
     tracing but instead of triangles and shape-ray intersection functions, ray
-    marching algorithms use distance functions, which take a point `p` and
-    return the distance of `p` to the boundary of the shape. For example, the
-    distance function of a sphere is:
+    marching algorithms use distance functions, which take a point \texttt{p}
+    and return the distance of \texttt{p} to the boundary of the shape. For
+    example, the distance function of a sphere is:
     \begin{minted}[fontsize=\footnotesize]{glsl}
 float sphere(vec3 p, float radius) {
   return length(p) - radius;
@@ -53,13 +53,13 @@ float box(vec3 p, vec3 size) {
   return length(max(abs(p) - size / 2., 0.));
 }
 
-float sdfCylinder(vec3 p, float radius, float height) {
+float cylinder(vec3 p, float radius, float height) {
   vec2 h = vec2(radius, height / 2.);
   vec2 d = abs(vec2(length(p.yz), p.x)) - h;
   return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
 }
 
-float sdfPlane(vec3 p, vec3 normal, float distance) {
+float p1ane(vec3 p, vec3 normal, float distance) {
   return dot(p, normal) + distance;
 }
     \end{minted}
@@ -101,9 +101,9 @@ void main() {
         We can translate a shape by shifting the \texttt{p} value:
 
         \begin{minted}[fontsize=\footnotesize]{glsl}
-// A sphere of radius 2 at (-1,1,0).
+// A sphere of radius 2 at (-1,0,0).
 float scene(vec3 p) {
-    p -= vec3(-1., 1., 0.);
+    p -= vec3(-1., 0., 0.);
     return sphere(p, 2.);
 }
         \end{minted}
@@ -133,7 +133,7 @@ vec3 rotateY(vec3 p, float a) {
 // A box with dimensions (2,1,1) rotated 45 degrees.
 float scene(vec3 p) {
     p = rotateY(p, pi / 4.);
-    return sbox(p, vec3(2., 1., 1.));
+    return box(p, vec3(2., 1., 1.));
 }
         \end{minted}
         \column{.5\textwidth}
@@ -221,7 +221,7 @@ float scene(vec3 p) {
 
 \begin{frame}[fragile]
     \frametitle{Building Interesting Shapes}
-    \graphic{building-interesting-shapes.png}
+    \graphic{shading.png}
 \end{frame}
 
 \begin{frame}[fragile]

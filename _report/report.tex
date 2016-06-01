@@ -1,0 +1,237 @@
+\documentclass[parskip=full]{scrartcl}
+\usepackage{graphicx}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage[backend=bibtex]{biblatex}
+
+\hypersetup{colorlinks,urlcolor=blue}
+\addbibresource{references.bib}
+\MakeOuterQuote{"}
+\newcommand\graphic[1]{\includegraphics[keepaspectratio=true,width=\textwidth]{../img/#1}}
+
+\begin{document}
+
+\section{Problem Statement}
+
+The project is a website that teaches various basic and advanced techniques
+based around the rendering technique known as ray marching. Using maths,
+graphics, code snippets, user-modifiable shader programs, and plain English,
+the website explains the theory and implementation of:
+\begin{itemize}
+    \item The sphere tracing algorithm.
+    \item Phong shading.
+    \item Distance functions.
+    \item Simple transformations on distance functions such as translation,
+        rotation, scaling, and boolean operators.
+    \item Advanced transformations on distance functions like infinite
+        repetition, skewing, and deformations.
+    \item Basic ambient occlusion.
+    \item Hard and soft shadows.
+    \item The terrain marching algorithm.
+    \item Using Perlin noise to generate interesting terrain geometry and
+        textures.
+    \item Fog and sun rendering.
+    \item High-detail Rendering the 2D Mandelbrot fractal using a distance
+        function.
+    \item Rendering of the 3D Mandelbulb fractal using a distance function.
+\end{itemize}
+
+The website is permanently available at
+
+\qquad\url{http://mcjohnalds.github.io/learn-ray-marching/RayMarchingOverview}.
+
+The code is viewable at
+
+\qquad\url{https://github.com/mcjohnalds/learn-ray-marching}.
+
+\section{Website Implementation}
+
+The website implementation relies on many technologies and languages. Primarily
+it uses:
+\begin{itemize}
+    \item HTML, CSS, and Javascript: Basic building blocks of any website.
+    \item WebGL: Javascript API for hardware accelerated rendering in the
+        browser, based on OpenGL ES.
+    \item GitHub Pages: Free static website hosting.
+    \item Jekyll: Static site generator that integrates with GitHub pages.
+    \item ACE editor: A code editor that can be embedded into a webpage.
+    \item MathJax: Displays latex formulas in the browser.
+\end{itemize}
+
+Each section of the website discusses a technique then follows with a 3D scene
+rendered inside the user's browser. The user can click a button to open an
+editor to view and edit the code used to render the scene.
+
+The editor contains two panes, and some controls like a play/pause button and
+"reset" button. The left pane contains a code editor for editing fragment
+shader code, the right pane contains the rendered output of the fragment
+shader.
+
+Every page on the website contains 3D scenes which are rendered in the browser
+using the techniques discussed.
+
+\section{Graphics Techniques}
+
+The website covers many ray marching related techniques, explaining how all of
+them work and giving functioning implementations that run in the browser. To
+aid in the learning process, these functional implementations can be modified
+and executed by the user within the website. Ray marches are suitable for
+implementing entirely in a fragment shader, so all the techniques following are
+implemented solely in fragment shaders.
+
+\subsection{Sphere tracing algorithm}
+
+Ray marchers are a category of rendering algorithms which render 2D or 3D
+scenes by marching along rays cast from the viewers' eye position (camera)
+until collision with a shape occurs. Shapes are usually defined by distance
+functions, which take a point $p$ and return the distance of $p$ from the
+boundary of the shape. A ray marching variant known as sphere tracing is given
+in the website.
+
+\subsection{Phong shading}
+
+Phong shading is a crude but effective approximation of ambient, diffuse, and
+specular lighting. Phong shading and its alternatives are not specific to
+ray marching algorithms so little space is spent of explaining it. The website
+uses point lights (like a light bulb) and directional lights (like the sun) in
+combination with Phong shading.
+
+\subsection{Distance function transformations}
+
+By applying operations to the input and output of distance functions, many
+different shapes can be created with a small amount of code. The website
+gives many distance functions for simple shapes and transformations that can
+be used to combine or modify shapes in interesting ways.
+
+\subsection{Basic ambient occlusion}
+
+Ambient occlusion simulates the process of light bouncing many times around a
+scene so surfaces may be lit even if there is no light directly shining on
+them. True ambient occlusion is highly computationally expensive and
+complicated to implement, however, one of the perks of ray marching algorithms
+is that they output the number of marches it took to reach a surface,
+information that can be used to give a simple approximation of ambient
+occlusion. This simple variant of ambient occlusion is given in the website.
+
+\subsection{Soft shadows}
+
+In real life, the edge of a shadow doesn't disappear instantly, but gradually,
+creating a penumbra around the darkest part of the shadow. Both soft and hard
+shadows are given in the website.
+
+\subsection{Terrain marching with Perlin noise}
+
+Functions of the form $y=f(x,z)$ can be used to define the height of terrain
+for every $(x,z)$ value, allowing for procedural creation of terrain geometry.
+These functions require a different variant of ray marching algorithm to
+render.
+
+There are many techniques to texture this terrain. Given a point on the terrain
+$(x,y,z)$, the height $y$ and the normal to the surface at $(x,y,z)$ can be
+used to decide the color.
+
+Perlin noise allows for natural looking randomly generated terrain geometry and
+texture. Procedural terrain geometry and textures created from Perlin noise is
+given in the website.
+
+\subsection{Fog and sun}
+
+Fog and a 2D sun in the sky add a final touch of realism to a scene.
+An exponential fog model is given in the website \cite{microsoft-fog-formulas}.
+
+\subsection{The Mandelbrot fractal}
+
+The Mandelbrot fractal is generated by visualizing all values of $c$ for which
+\[
+    z_{n+1}=z_n^2+c
+\]
+converges as $n\to\infty$, where $c$ and $z$ are complex numbers. Two
+implementations are given: a naive escape time algorithm, and a better
+algorithm based on distance functions.
+
+\subsection{The Mandelbulb fractal}
+
+The Mandelbulb fractal is a version of the Mandelbrot fractal generalized to
+three dimensions. A distance function for rendering Mandelbulb fractals is
+given in the website.
+
+\section{Results}
+
+\begin{figure}[H]
+    \graphic{shading.png}
+    \caption{Demonstration of distance function transformations. In the back
+        row from left to right: A union operation between a sphere and a cube,
+        a difference operation, and an intersection operation. In the front
+        row from left to right: A displacement function applied to a cylinder,
+        a skewed cube, and a very twisted cylinder. Also note the soft
+        shadows.}
+    \bigskip
+    \graphic{infinite-spheres.png}
+    \caption{A demonstration of the \texttt{mod} function can be used to create
+        infinite repetition without a large computational cost. In the code
+        editor, the shader can be unpaused to enable animation.}
+\end{figure}
+
+\begin{figure}[H]
+    \graphic{sinxcosz.png}
+    \caption{The result of rendering the function $y=\sin(x)\cos(z)$ using a
+        terrain marching algorithm.}
+    \bigskip
+    \graphic{terrain-marching.png}
+    \caption{The result of rendering a function based on Perlin noise using a
+        terrain marching algorithm. The terrain is textured by taking into
+        account the height and normal of the surface being textured. Also
+        includes a sun and fog.}
+\end{figure}
+
+\begin{figure}[H]
+    \graphic{mandelbrot-escape-time.png}
+    \graphic{mandelbrot-dist-func.png}
+    \caption{The result of rendering the Mandelbrot fractal with the naive
+        escape time algorithm versus using distance functions.}
+\end{figure}
+
+\begin{figure}[H]
+    \graphic{mandelbulb2.png}
+    \graphic{mandelbulb8.png}
+    \caption{On the top: A ray marched Mandelbulb fractal given by
+        $z_{n+1}=z_n^2+c$ where $z$ and $c$ are triplex numbers (complex
+        numbers with 3 dimensions). On the bottom: The same, but with
+        $z_{n+1}=z_n^8+c$. In the website, the bottom image is an animated and
+        interactive shader. When paused, the fractal can be rotated with the
+        mouse. When unpaused, the shader is constantly zooming in to the
+        fractal, revealing the never-ending complexity the shader provides.
+        Both of these shaders make use of the cheap ambient occlusion mentioned
+        previously.}
+\end{figure}
+
+\begin{figure}[H]
+    \graphic{editor.png}
+    \caption{A screenshot of the shader editor.}
+\end{figure}
+
+\section{Discussion}
+
+The combination of simple English, maths, and code to explain techniques
+ensures that even if a reader fails to understand half of the content they read
+through, they will still learn much from the experience.
+
+Integrating a shader editor in the website is a very important feature, because
+if the user had to download, install dependencies, compile, and execute all the
+code themselves, they would spend far too much time on tasks which offer little
+educational value.
+
+The design of the website is optimized for readability, following common
+typographic rules.
+
+The website uses pretty graphics, clear code, and interactivity to teach many
+computer graphics techniques to anyone who knows the basics of computer
+graphics. Unfortunately, writing simple English explanations of the techniques
+used, and creating appropriate figures and animations is very time consuming,
+so the website is severely lacking in those departments.
+
+\nocite{*}
+\printbibliography
+
+\end{document}
