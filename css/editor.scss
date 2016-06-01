@@ -24,6 +24,10 @@ body {
 
     header {
         height: $editor-header-height;
+
+        .compile-button {
+            background-color: #A1D490;
+        }
     }
 
     main {

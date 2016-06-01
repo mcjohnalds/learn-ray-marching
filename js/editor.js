@@ -6,7 +6,7 @@ $(window).load(function() {
         toy: $(".ide .toy"),
         footer: $(".ide footer"),
         output: $(".ide .output"),
-        reloadFile: $(".ide .reload-file-button"),
+        compile: $(".ide .compile-button"),
         file: $(".ide .file-selector"),
         resolution: $(".ide .resolution-selector"),
         theme: $(".ide .theme-selector"),

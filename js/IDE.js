@@ -7,9 +7,7 @@ class IDE {
         this.compileShader();
         this.updateResolutionRatio();
 
-        elems.reloadFile.click(() => {
-            this.setFile("shaders/" + elems.file.val() + ".glsl")
-        });
+        elems.compile.click(() => this.compileShader());
 
         elems.file.change(() => {
             this.setFile("shaders/" + elems.file.val() + ".glsl")
@@ -86,7 +84,7 @@ class IDE {
     compileShader() {
         try {
             this.toy.load(this.editor.getValue());
-            this.elems.output.text("Shader compiled successfully");
+            this.elems.output.text("Shader compiled successfully. Press Compile or Alt-Enter to compile again.");
             this.elems.footer.removeClass("fail");
             this.elems.footer.addClass("success");
         } catch (e) {

@@ -23,15 +23,17 @@
     <body>
         <div class="ide">
             <header>
-                <button class="reload-file-button">Reload</button>
+                <button class="compile-button">Compile</button>
 
+                <span>Load file:</span>
                 <select class="file-selector">
-                    {% assign files = "camera-rotation diffuse-sphere minimal-sphere rotate-xyz simple.glsl sphere-specular trs-cube union-intersect-subtract terrain city colosseum test mandelbrot tetrahedron mandelbulb" | split: " " %}
+                    {% assign files = "ray-marching-overview infinite-spheres building-interesting-shapes shading terrain-marching mandelbrot-escape-time mandelbrot-dist-func mandelbulb" | split: " " %}
                     {% for file in files %}
                         <option value="{{ file }}">{{ file }}</option>
                     {% endfor %}
                 </select>
 
+                <span>Resolution:</span>
                 <select class="resolution-selector">
                     <option value="500"></option>
                     <option value="400"></option>
@@ -51,11 +53,13 @@
                     <option value="10"></option>
                 </select>
 
+                <span>Theme:</span>
                 <select class="theme-selector">
                     <option value="ace/theme/github">GitHub</option>
                     <option value="ace/theme/solarized_dark">Solarized dark</option>
                 </select>
 
+                <span>Play/pause:</span>
                 <input class="play-pause-button" type="checkbox">
 
                 <button class="reset">Reset</button>
