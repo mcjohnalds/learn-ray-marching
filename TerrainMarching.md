@@ -8,7 +8,16 @@ next: Fractals
 There is another ray marching algorithm, suitable for rendering terrain. The
 basic idea is that rather than a distance function, we have a function `f`
 which takes x and z coordinates and spits out the height of the terrain at that
-point, i.e, `y=terrain(x,z)`. For example:
+point, i.e, `y=terrain(x,z)`
+
+<figure>
+    <img src="img/terrainmarch-anim.png">
+    <figcaption>A visualisation of the sphere tracing algorithm. The blue lines
+    represent the ouput of the `terrain` function. The blue dots are points on
+    the surface found by the ray marcher.</figcaption>
+</figure>
+
+For example:
 
 ```glsl
 bool castRay(vec3 ro, vec3 rd, out float resT) {

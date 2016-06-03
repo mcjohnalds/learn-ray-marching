@@ -65,7 +65,12 @@ and continued on to infinity. We can use this information to find the point
 where each ray intersects that shape, and from there we can apply lighting and
 shadows to the shape accordingly.
 
-(Insert fig)
+<figure>
+    <img src="img/raymarch-anim.png">
+    <figcaption>A visualisation of the sphere tracing algorithm. The blue
+    circles represent the ouput of the distance function. The blue dots are
+    points on the surface found by the ray marcher.</figcaption>
+</figure>
 
 We will discuss the algorithm in more detail in a later section. But first, we
 need to figure out which direction to send the rays.
